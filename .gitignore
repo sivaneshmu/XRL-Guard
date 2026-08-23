@@ -216,3 +216,21 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+# Dataset files
+data/*.txt
+
+# Python
+__pycache__/
+*.py[cod]
+venv/
+
+# Trained models
+models/*.zip
+models/*.pkl
+models/*.joblib
+
+# Streamlit
+.streamlit/
+
+# IDE
+.vscode/
