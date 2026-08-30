@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>XRL-Guard Dashboard</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f6f9;
+            color: #1f2937;
+        }
+
+        .header {
+            background: #111827;
+            color: white;
+            padding: 25px 35px;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+        }
+
+        .header p {
+            margin: 8px 0 0;
+            color: #cbd5e1;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: auto;
+            padding: 30px;
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .card-title {
+            color: #64748b;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .card-value {
+            font-size: 30px;
+            font-weight: bold;
+        }
+
+        .green {
+            color: #16a34a;
+        }
+
+        .red {
+            color: #dc2626;
+        }
+
+        .blue {
+            color: #2563eb;
+        }
+
+        .purple {
+            color: #7c3aed;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-bottom: 25px;
+        }
+
+        .panel {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            margin-bottom: 25px;
+        }
+
+        .panel h2 {
+            margin-top: 0;
+            margin-bottom: 20px;
+            font-size: 20px;
+        }
+
+        .chart-box {
+            height: 320px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: #f1f5f9;
+            text-align: left;
+            padding: 14px;
+        }
+
+        td {
+            padding: 14px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .badge {
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .normal {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .dos {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .probe {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .r2l {
+            background: #fce7f3;
+            color: #9d174d;
+        }
+
+        .u2r {
+            background: #ede9fe;
+            color: #5b21b6;
+        }
+
+        .other {
+            background: #e0f2fe;
+            color: #075985;
+        }
+
+        .allow {
+            color: #16a34a;
+            font-weight: bold;
+        }
+
+        .monitor {
+            color: #ca8a04;
+            font-weight: bold;
+        }
+
+        .block {
+            color: #dc2626;
+            font-weight: bold;
+        }
+
+        .quarantine {
+            color: #7c3aed;
+            font-weight: bold;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 25px;
+            color: #64748b;
+        }
+
+        @media (max-width: 900px) {
+
+            .cards {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+        }
+
+        @media (max-width: 600px) {
+
+            .cards {
+                grid-template-columns: 1fr;
+            }
+
+            .container {
+                padding: 15px;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+    <div class="header">
+
+        <h1>XRL-Guard</h1>
+
+        <p>
+            Explainable Reinforcement Learning for Network Security
+        </p>
+
+    </div>
+
+
+    <div class="container">
+
+
+        <!-- SUMMARY CARDS -->
+
+        <div class="cards">
+
+
+            <div class="card">
+
+                <div class="card-title">
+                    Test Records
+                </div>
+
+                <div class="card-value purple">
+                    {{ total_records }}
+                </div>
+
+            </div>
+
+
+            <div class="card">
+
+                <div class="card-title">
+                    Accuracy
+                </div>
+
+                <div class="card-value green">
+                    {{ accuracy }}%
+                </div>
+
+            </div>
+
+
+            <div class="card">
+
+                <div class="card-title">
+                    Incorrect Decisions
+                </div>
+
+                <div class="card-value red">
+                    {{ incorrect }}
+                </div>
+
+            </div>
+
+
+            <div class="card">
+
+                <div class="card-title">
+                    Average Reward
+                </div>
+
+                <div class="card-value blue">
+                    {{ avg_reward }}
+                </div>
+
+            </div>
+
+
+        </div>
+
+
+        <!-- CHARTS -->
+
+        <div class="grid">
+
+
+            <div class="panel">
+
+                <h2>
+                    Attack Category Distribution
+                </h2>
+
+                <div class="chart-box">
+
+                    <canvas id="attackChart"></canvas>
+
+                </div>
+
+            </div>
+
+
+            <div class="panel">
+
+                <h2>
+                    Predicted Action Distribution
+                </h2>
+
+                <div class="chart-box">
+
+                    <canvas id="actionChart"></canvas>
+
+                </div>
+
+            </div>
+
+
+        </div>
+
+
+        <!-- CATEGORY RESULTS -->
+
+        <div class="panel">
+
+            <h2>
+                Per-Attack-Category Performance
+            </h2>
+
+
+            <table>
+
+                <thead>
+
+                    <tr>
+
+                        <th>Category</th>
+                        <th>Total</th>
+                        <th>Correct</th>
+                        <th>Accuracy</th>
+                        <th>Expected Action</th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    {% for item in category_results %}
+
+                    <tr>
+
+                        <td>
+
+                            <span class="badge {{ item.category }}">
+
+                                {{ item.category.upper() }}
+
+                            </span>
+
+                        </td>
+
+
+                        <td>
+                            {{ item.total }}
+                        </td>
+
+
+                        <td>
+                            {{ item.correct }}
+                        </td>
+
+
+                        <td>
+                            <strong>{{ item.accuracy }}%</strong>
+                        </td>
+
+
+                        <td>
+
+                            <span class="{{ item.action_class }}">
+
+                                {{ item.expected_action }}
+
+                            </span>
+
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+
+        <!-- ACTION DISTRIBUTION -->
+
+        <div class="panel">
+
+            <h2>
+                Action Distribution
+            </h2>
+
+
+            <table>
+
+                <thead>
+
+                    <tr>
+
+                        <th>Action</th>
+                        <th>Count</th>
+                        <th>Percentage</th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+
+                    <tr>
+
+                        <td class="allow">
+                            Allow
+                        </td>
+
+                        <td>
+                            {{ action_distribution.allow }}
+                        </td>
+
+                        <td>
+                            {{ action_distribution.allow_percent }}%
+                        </td>
+
+                    </tr>
+
+
+                    <tr>
+
+                        <td class="monitor">
+                            Monitor
+                        </td>
+
+                        <td>
+                            {{ action_distribution.monitor }}
+                        </td>
+
+                        <td>
+                            {{ action_distribution.monitor_percent }}%
+                        </td>
+
+                    </tr>
+
+
+                    <tr>
+
+                        <td class="block">
+                            Block
+                        </td>
+
+                        <td>
+                            {{ action_distribution.block }}
+                        </td>
+
+                        <td>
+                            {{ action_distribution.block_percent }}%
+                        </td>
+
+                    </tr>
+
+
+                    <tr>
+
+                        <td class="quarantine">
+                            Quarantine
+                        </td>
+
+                        <td>
+                            {{ action_distribution.quarantine }}
+                        </td>
+
+                        <td>
+                            {{ action_distribution.quarantine_percent }}%
+                        </td>
+
+                    </tr>
+
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+
+    </div>
+
+
+    <div class="footer">
+
+        XRL-Guard Security Dashboard
+
+    </div>
+
+
+    <!--
+        JINJA DATA
+
+        Jinja is kept outside JavaScript.
+        This prevents VS Code "Property assignment expected"
+        errors.
+    -->
+
+    <div id="dashboardData"
+
+         data-attack-labels='{{ attack_labels | tojson | safe }}'
+
+         data-attack-values='{{ attack_values | tojson | safe }}'
+
+         data-action-labels='{{ action_labels | tojson | safe }}'
+
+         data-action-values='{{ action_values | tojson | safe }}'>
+
+    </div>
+
+
+    <script>
+
+        const dashboardData =
+            document.getElementById("dashboardData");
+
+
+        const attackLabels =
+            JSON.parse(
+                dashboardData.dataset.attackLabels
+            );
+
+
+        const attackValues =
+            JSON.parse(
+                dashboardData.dataset.attackValues
+            );
+
+
+        const actionLabels =
+            JSON.parse(
+                dashboardData.dataset.actionLabels
+            );
+
+
+        const actionValues =
+            JSON.parse(
+                dashboardData.dataset.actionValues
+            );
+
+
+        /* ATTACK CATEGORY CHART */
+
+        const attackCanvas =
+            document.getElementById("attackChart");
+
+
+        new Chart(
+            attackCanvas,
+            {
+                type: "doughnut",
+
+                data: {
+
+                    labels: attackLabels,
+
+                    datasets: [
+                        {
+                            data: attackValues
+                        }
+                    ]
+
+                },
+
+                options: {
+
+                    responsive: true,
+
+                    maintainAspectRatio: false,
+
+                    plugins: {
+
+                        legend: {
+
+                            position: "bottom"
+
+                        }
+
+                    }
+
+                }
+
+            }
+        );
+
+
+        /* ACTION DISTRIBUTION CHART */
+
+        const actionCanvas =
+            document.getElementById("actionChart");
+
+
+        new Chart(
+            actionCanvas,
+            {
+                type: "bar",
+
+                data: {
+
+                    labels: actionLabels,
+
+                    datasets: [
+                        {
+                            label: "Predicted Actions",
+
+                            data: actionValues
+                        }
+                    ]
+
+                },
+
+                options: {
+
+                    responsive: true,
+
+                    maintainAspectRatio: false,
+
+                    scales: {
+
+                        y: {
+
+                            beginAtZero: true,
+
+                            ticks: {
+
+                                precision: 0
+
+                            }
+
+                        }
+
+                    },
+
+                    plugins: {
+
+                        legend: {
+
+                            display: false
+
+                        }
+
+                    }
+
+                }
+
+            }
+        );
+
+    </script>
+
+
+</body>
+
+</html>
