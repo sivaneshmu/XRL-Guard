@@ -235,3 +235,7 @@ models/*.joblib
 # IDE
 .vscode/
 cert/
+data/processed/X_train.csv
+data/processed/X_test.csv
+data/processed/X_train.csv
+data/processed/X_test.csv
