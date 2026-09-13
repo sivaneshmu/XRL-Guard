@@ -215,6 +215,83 @@
             }
 
         }
+                .live-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .live-button {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 12px 18px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .live-button:hover {
+            background: #1d4ed8;
+        }
+
+        .live-button:disabled {
+            background: #94a3b8;
+            cursor: not-allowed;
+        }
+
+        .live-status {
+            color: #64748b;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+
+        .live-table {
+            overflow-x: auto;
+        }
+
+        .incident-id {
+            font-weight: bold;
+            color: #2563eb;
+        }
+
+        .confidence {
+            font-weight: bold;
+        }
+
+        .empty-message {
+            text-align: center;
+            color: #64748b;
+            padding: 25px;
+        }
+
+        .action-status {
+            font-weight: bold;
+            font-size: 13px;
+        }
+
+        .status-pending { color: #ca8a04; }
+        .status-completed { color: #16a34a; }
+
+        .complete-button {
+            background: #16a34a;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .complete-button:hover { background: #15803d; }
+        .complete-button:disabled {
+            background: #94a3b8;
+            cursor: not-allowed;
+        }
 
     </style>
 
@@ -518,6 +595,66 @@
 
 
     </div>
+            <!-- LIVE RUNTIME MONITORING -->
+
+        <div class="panel">
+
+            <div class="live-header">
+
+                <h2>
+                    Live Security Incidents
+                </h2>
+
+                <button
+                    id="generateIncidentButton"
+                    class="live-button"
+                    onclick="generateLiveIncident()">
+                    ⚡ Generate Live Incident
+                </button>
+
+            </div>
+
+            <div
+                id="liveStatus"
+                class="live-status">
+                Runtime monitoring connected.
+            </div>
+
+            <div class="live-table">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+                            <th>Incident ID</th>
+                            <th>Category</th>
+                            <th>Severity</th>
+                            <th>Suggested Action</th>
+                            <th>Confidence</th>
+                            <th>Recommendation</th>
+                            <th>User Action</th>
+                        </tr>
+
+                    </thead>
+
+                    <tbody id="incidentTableBody">
+
+                        <tr>
+                            <td
+                                colspan="6"
+                                class="empty-message">
+                                Loading live incidents...
+                            </td>
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
 
 
     <div class="footer">
@@ -684,6 +821,183 @@
 
             }
         );
+
+    </script>
+        <script>
+
+        const RUNTIME_API =
+            "https://127.0.0.1:5001";
+
+
+        async function loadLiveIncidents() {
+
+            const status = document.getElementById("liveStatus");
+            const table = document.getElementById("incidentTableBody");
+
+            try {
+                const response = await fetch(RUNTIME_API + "/api/incidents");
+
+                if (!response.ok) {
+                    throw new Error("Runtime API returned " + response.status);
+                }
+
+                const data = await response.json();
+                table.innerHTML = "";
+
+                if (!data.incidents || data.incidents.length === 0) {
+                    table.innerHTML = `
+                        <tr>
+                            <td colspan="7" class="empty-message">
+                                No live incidents available.
+                            </td>
+                        </tr>`;
+                    status.textContent = "No incidents recorded.";
+                    return;
+                }
+
+                data.incidents.slice().reverse().forEach(function(incident) {
+
+                    const row = document.createElement("tr");
+                    const confidence = (Number(incident.confidence) * 100).toFixed(2);
+                    const action = incident.suggested_action || "Unknown";
+                    const actionClass = action.toLowerCase();
+                    const actionStatus = incident.user_action_status || "PENDING";
+
+                    let userActionCell;
+
+                    if (actionStatus === "COMPLETED") {
+                        userActionCell = `
+                            <span class="action-status status-completed">
+                                ✓ COMPLETED
+                            </span>`;
+                    } else {
+                        userActionCell = `
+                            <div>
+                                <span class="action-status status-pending">
+                                    PENDING
+                                </span>
+                                <br><br>
+                                <button
+                                    class="complete-button"
+                                    onclick="completeIncident('${incident.incident_id}')">
+                                    ✓ Action Completed
+                                </button>
+                            </div>`;
+                    }
+
+                    row.innerHTML = `
+                        <td>
+                            <span class="incident-id">
+                                ${incident.incident_id}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge ${incident.category}">
+                                ${incident.category.toUpperCase()}
+                            </span>
+                        </td>
+                        <td><strong>${incident.severity}</strong></td>
+                        <td class="${actionClass}">${action}</td>
+                        <td>
+                            <span class="confidence">${confidence}%</span>
+                        </td>
+                        <td>${incident.recommendation}</td>
+                        <td>${userActionCell}</td>
+                    `;
+
+                    table.appendChild(row);
+                });
+
+                status.textContent =
+                    "Showing " + data.count +
+                    " recent live incidents. User confirmation is required after performing the suggested action.";
+
+            } catch (error) {
+                console.error("Runtime API error:", error);
+                status.textContent = "Runtime API connection failed.";
+                table.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="empty-message">
+                            Unable to connect to runtime API.
+                        </td>
+                    </tr>`;
+            }
+        }
+
+
+        async function generateLiveIncident() {
+
+            const button = document.getElementById("generateIncidentButton");
+            const status = document.getElementById("liveStatus");
+
+            button.disabled = true;
+            button.textContent = "Generating...";
+            status.textContent = "Analyzing network event using PPO + XAI...";
+
+            try {
+                const response = await fetch(
+                    RUNTIME_API + "/api/generate",
+                    { method: "POST" }
+                );
+
+                if (!response.ok) {
+                    throw new Error("Generation failed: " + response.status);
+                }
+
+                const data = await response.json();
+
+                if (data.success) {
+                    status.textContent =
+                        "New incident generated: " +
+                        data.incident.incident_id +
+                        ". Review the suggested action and perform it if appropriate.";
+                    await loadLiveIncidents();
+                }
+
+            } catch (error) {
+                console.error("Incident generation error:", error);
+                status.textContent = "Unable to generate live incident.";
+            } finally {
+                button.disabled = false;
+                button.textContent = "⚡ Generate Live Incident";
+            }
+        }
+
+
+        async function completeIncident(incidentId) {
+
+            const status = document.getElementById("liveStatus");
+            status.textContent = "Recording user action...";
+
+            try {
+                const response = await fetch(
+                    RUNTIME_API +
+                    "/api/incidents/" +
+                    encodeURIComponent(incidentId) +
+                    "/complete",
+                    { method: "POST" }
+                );
+
+                if (!response.ok) {
+                    throw new Error("Completion failed: " + response.status);
+                }
+
+                const data = await response.json();
+
+                if (data.success) {
+                    status.textContent =
+                        "User action recorded as COMPLETED for " + incidentId + ".";
+                    await loadLiveIncidents();
+                }
+
+            } catch (error) {
+                console.error("Completion error:", error);
+                status.textContent = "Unable to record user action.";
+            }
+        }
+
+
+        loadLiveIncidents();
 
     </script>
 

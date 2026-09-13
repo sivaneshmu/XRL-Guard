@@ -88,8 +88,28 @@ class XRLGuardEnv(gym.Env):
         # BALANCED CATEGORY SAMPLING
         # -------------------------------------------------
 
+        #category = self.np_random.choice(
+         #   available_categories
+        #)
+        sampling_categories = [
+            "normal",
+            "dos",
+            "probe",
+            "r2l",
+            "u2r"
+        ]
+
+        sampling_weights = [
+            0.20,   # normal
+            0.20,   # dos
+            0.20,   # probe
+            0.30,   # r2l
+            0.10    # u2r
+        ]
+
         category = self.np_random.choice(
-            available_categories
+            sampling_categories,
+            p=sampling_weights
         )
 
         self.current_index = self.np_random.choice(
@@ -108,75 +128,44 @@ class XRLGuardEnv(gym.Env):
 
     def step(self, action):
 
-        category = self.y.iloc[
-            self.current_index
-        ]
+        # -------------------------------------------------
+        # GET CATEGORY OF CURRENT OBSERVATION
+        # -------------------------------------------------
+
+        category = self.y.iloc[self.current_index]
 
         action = int(action)
 
         # -------------------------------------------------
-        # REWARD FUNCTION
+        # EXPECTED ACTION
         # -------------------------------------------------
 
         if category == "normal":
-
-            rewards = {
-                0: 5,      # Allow - correct
-                1: 2,      # Monitor - acceptable
-                2: -5,     # Block - false positive
-                3: -6      # Quarantine - false positive
-            }
+            expected_action = 0
 
         elif category == "dos":
-
-            rewards = {
-                0: -6,     # Allow - dangerous
-                1: -2,     # Monitor
-                2: 6,      # Block - correct
-                3: 3       # Quarantine
-            }
+            expected_action = 2
 
         elif category == "probe":
-
-            rewards = {
-                0: -5,     # Allow
-                1: 2,      # Monitor
-                2: 6,      # Block - correct
-                3: 3       # Quarantine
-            }
+            expected_action = 2
 
         elif category == "r2l":
-
-            rewards = {
-                0: -6,     # Allow
-                1: 1,      # Monitor
-                2: 3,      # Block
-                3: 6       # Quarantine - correct
-            }
+            expected_action = 3
 
         elif category == "u2r":
-
-            rewards = {
-                0: -6,     # Allow
-                1: 1,      # Monitor
-                2: 3,      # Block
-                3: 6       # Quarantine - correct
-            }
+            expected_action = 3
 
         else:
+            expected_action = 2
 
-            # -------------------------------------------------
-            # OTHER ATTACK CATEGORY
-            # -------------------------------------------------
+        # -------------------------------------------------
+        # SIMPLE REWARD
+        # -------------------------------------------------
 
-            rewards = {
-                0: -6,     # Allow
-                1: 1,      # Monitor
-                2: 6,      # Block - correct
-                3: 3       # Quarantine
-            }
-
-        reward = rewards[action]
+        if action == expected_action:
+            reward = 1
+        else:
+            reward = -1
 
         # -------------------------------------------------
         # ONE-STEP ENVIRONMENT
@@ -193,7 +182,9 @@ class XRLGuardEnv(gym.Env):
         info = {
             "attack_category": category,
             "action": action,
-            "reward": reward
+            "expected_action": expected_action,
+            "reward": reward,
+            "correct": action == expected_action
         }
 
         return (
@@ -268,6 +259,8 @@ if __name__ == "__main__":
     print("Sample action          :", action)
     print("Sample reward          :", reward)
     print("Attack category        :", info["attack_category"])
+    print("Expected action        :", info["expected_action"])
+    print("Correct                :", info["correct"])
 
     print("\n" + "=" * 60)
     print("RL ENVIRONMENT TEST COMPLETED")

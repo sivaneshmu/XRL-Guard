@@ -38,7 +38,7 @@ model = PPO(
     env,
 
     # Learning rate
-    learning_rate=0.00005,
+    learning_rate=0.00003,
 
     # PPO rollout
     n_steps=4096,
@@ -56,7 +56,7 @@ model = PPO(
     # PPO clipping
     clip_range=0.2,
 
-    # Moderate exploration
+    # Exploration
     ent_coef=0.01,
 
     # Value function coefficient
@@ -65,10 +65,11 @@ model = PPO(
     # Gradient clipping
     max_grad_norm=0.5,
 
+    # Larger policy/value networks
     policy_kwargs=dict(
         net_arch=dict(
-            pi=[128, 128],
-            vf=[128, 128]
+            pi=[256, 256],
+            vf=[256, 256]
         )
     ),
 

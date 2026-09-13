@@ -1,0 +1,27 @@
+incident_id,timestamp,record_id,category,severity,suggested_action,confidence,risk_level,recommendation,reason,user_action_status
+INC-1A1C128A,2026-09-12 14:11:37,20952,normal,LOW,Allow,1.0,HIGH,Allow the activity and continue monitoring.,The agent considers the observed network activity suitable for normal operation.,COMPLETED
+INC-5AEE20DF,2026-09-12 14:18:43,20952,normal,LOW,Allow,1.0,HIGH,Allow the activity and continue monitoring.,The agent considers the observed network activity suitable for normal operation.,COMPLETED
+INC-53603DE5,2026-09-12 14:24:20,20952,normal,LOW,Allow,1.0,HIGH,Allow the activity and continue monitoring.,The agent considers the observed network activity suitable for normal operation.,COMPLETED
+INC-69C6AEA0,2026-09-12 14:24:27,3648,other,HIGH,Allow,0.9968,HIGH,Allow the activity and continue monitoring.,The agent considers the observed network activity suitable for normal operation.,COMPLETED
+INC-A0D9D135,2026-09-12 14:24:31,819,normal,LOW,Allow,1.0,HIGH,Allow the activity and continue monitoring.,The agent considers the observed network activity suitable for normal operation.,COMPLETED
+INC-40DE5E9F,2026-09-12 14:24:33,9012,other,HIGH,Allow,0.9798,HIGH,Allow the activity and continue monitoring.,The agent considers the observed network activity suitable for normal operation.,COMPLETED
+INC-11B03C5E,2026-09-12 14:24:35,8024,normal,LOW,Allow,0.8553,HIGH,Allow the activity and continue monitoring.,The agent considers the observed network activity suitable for normal operation.,COMPLETED
+INC-8FEAF08B,2026-09-12 14:24:38,7314,other,HIGH,Allow,1.0,HIGH,Allow the activity and continue monitoring.,The agent considers the observed network activity suitable for normal operation.,COMPLETED
+INC-864B56C0,2026-09-12 14:24:40,4572,other,HIGH,Allow,1.0,HIGH,Allow the activity and continue monitoring.,The agent considers the observed network activity suitable for normal operation.,COMPLETED
+INC-711431A5,2026-09-12 14:24:46,3358,other,HIGH,Allow,0.9981,HIGH,Allow the activity and continue monitoring.,The agent considers the observed network activity suitable for normal operation.,COMPLETED
+INC-A191F1E0,2026-09-12 14:24:49,22174,dos,HIGH,Block,0.9999,HIGH,Block the activity to prevent possible harm.,The agent recommends blocking the activity because the observed features indicate potentially harmful behavior.,COMPLETED
+INC-45FB6A29,2026-09-12 14:24:52,17870,dos,HIGH,Block,1.0,HIGH,Block the activity to prevent possible harm.,The agent recommends blocking the activity because the observed features indicate potentially harmful behavior.,COMPLETED
+INC-7FF03CD9,2026-09-12 14:24:55,2848,dos,HIGH,Block,1.0,HIGH,Block the activity to prevent possible harm.,The agent recommends blocking the activity because the observed features indicate potentially harmful behavior.,COMPLETED
+INC-300E4322,2026-09-12 14:24:58,19349,normal,LOW,Block,1.0,HIGH,Block the activity to prevent possible harm.,The agent recommends blocking the activity because the observed features indicate potentially harmful behavior.,COMPLETED
+INC-7EAAA8DC,2026-09-12 14:25:00,13825,normal,LOW,Allow,1.0,HIGH,Allow the activity and continue monitoring.,The agent considers the observed network activity suitable for normal operation.,COMPLETED
+INC-5CA17907,2026-09-12 14:25:02,1041,normal,LOW,Allow,1.0,HIGH,Allow the activity and continue monitoring.,The agent considers the observed network activity suitable for normal operation.,COMPLETED
+INC-996313EA,2026-09-12 14:25:03,976,normal,LOW,Allow,1.0,HIGH,Allow the activity and continue monitoring.,The agent considers the observed network activity suitable for normal operation.,COMPLETED
+INC-D8E7A492,2026-09-12 14:25:06,3070,normal,LOW,Allow,0.9835,HIGH,Allow the activity and continue monitoring.,The agent considers the observed network activity suitable for normal operation.,COMPLETED
+INC-25420099,2026-09-12 15:05:46,7164,normal,LOW,Allow,1.0,HIGH,Allow the activity and continue monitoring.,The agent considers the observed network activity suitable for normal operation.,COMPLETED
+INC-90939B96,2026-09-12 15:05:54,7623,dos,HIGH,Block,1.0,HIGH,Block the activity to prevent possible harm.,The agent recommends blocking the activity because the observed features indicate potentially harmful behavior.,COMPLETED
+INC-186B7528,2026-09-12 15:05:59,16559,other,HIGH,Allow,0.9967,HIGH,Allow the activity and continue monitoring.,The agent considers the observed network activity suitable for normal operation.,COMPLETED
+INC-D9B29D8A,2026-09-12 16:35:14,19726,normal,LOW,Allow,1.0,HIGH,Allow the activity and continue monitoring.,The agent considers the observed network activity suitable for normal operation.,COMPLETED
+INC-93B1F720,2026-09-12 16:35:18,869,normal,LOW,Allow,0.9907,HIGH,Allow the activity and continue monitoring.,The agent considers the observed network activity suitable for normal operation.,COMPLETED
+INC-E5663431,2026-09-12 16:35:20,18390,dos,HIGH,Block,0.9999,HIGH,Block the activity to prevent possible harm.,The agent recommends blocking the activity because the observed features indicate potentially harmful behavior.,COMPLETED
+INC-06963450,2026-09-13 11:50:14,6515,normal,LOW,Allow,1.0,HIGH,Allow the activity and continue monitoring.,The agent considers the observed network activity suitable for normal operation.,COMPLETED
+INC-7414046C,2026-09-13 11:50:18,21295,normal,LOW,Allow,1.0,HIGH,Allow the activity and continue monitoring.,The agent considers the observed network activity suitable for normal operation.,COMPLETED

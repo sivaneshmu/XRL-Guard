@@ -1,9 +1,12 @@
 import pandas as pd
-from sklearn.preprocessing import LabelEncoder, StandardScaler
+from sklearn.preprocessing import StandardScaler
 from pathlib import Path
 
 
-# Project paths
+# ---------------------------------------------------------
+# PROJECT PATHS
+# ---------------------------------------------------------
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 DATA_DIR = BASE_DIR / "data"
 PROCESSED_DIR = DATA_DIR / "processed"
@@ -11,7 +14,10 @@ PROCESSED_DIR = DATA_DIR / "processed"
 PROCESSED_DIR.mkdir(exist_ok=True)
 
 
-# NSL-KDD column names
+# ---------------------------------------------------------
+# NSL-KDD COLUMN NAMES
+# ---------------------------------------------------------
+
 COLUMNS = [
     "duration",
     "protocol_type",
@@ -59,8 +65,69 @@ COLUMNS = [
 ]
 
 
+# ---------------------------------------------------------
+# ATTACK CATEGORY MAPPING
+# ---------------------------------------------------------
+
+ATTACK_MAPPING = {
+
+    # DoS
+    "back": "dos",
+    "land": "dos",
+    "neptune": "dos",
+    "pod": "dos",
+    "smurf": "dos",
+    "teardrop": "dos",
+    "apache2": "dos",
+    "mailbomb": "dos",
+    "processtable": "dos",
+    "udpstorm": "dos",
+    "worm": "dos",
+
+    # Probe
+    "ipsweep": "probe",
+    "nmap": "probe",
+    "portsweep": "probe",
+    "satan": "probe",
+    "mscan": "probe",
+    "saint": "probe",
+
+    # R2L
+    "ftp_write": "r2l",
+    "guess_passwd": "r2l",
+    "imap": "r2l",
+    "multihop": "r2l",
+    "phf": "r2l",
+    "spy": "r2l",
+    "warezclient": "r2l",
+    "warezmaster": "r2l",
+    "httptunnel": "r2l",
+    "named": "r2l",
+    "sendmail": "r2l",
+    "snmpgetattack": "r2l",
+    "snmpguess": "r2l",
+    "xlock": "r2l",
+    "xsnoop": "r2l",
+
+    # U2R
+    "buffer_overflow": "u2r",
+    "loadmodule": "u2r",
+    "perl": "u2r",
+    "rootkit": "u2r",
+    "ps": "u2r",
+    "sqlattack": "u2r",
+    "xterm": "u2r",
+
+    # Normal
+    "normal": "normal"
+}
+
+
+# ---------------------------------------------------------
+# LOAD DATA
+# ---------------------------------------------------------
+
 def load_dataset(file_path):
-    """Load an NSL-KDD dataset."""
 
     df = pd.read_csv(
         file_path,
@@ -71,225 +138,164 @@ def load_dataset(file_path):
     return df
 
 
-def convert_attack_labels(df):
-    """
-    Convert individual attack names into broader cybersecurity categories.
-    """
+# ---------------------------------------------------------
+# CONVERT ATTACK LABELS
+# ---------------------------------------------------------
 
-    attack_mapping = {
-        # Denial of Service
-        "back": "dos",
-        "land": "dos",
-        "neptune": "dos",
-        "pod": "dos",
-        "smurf": "dos",
-        "teardrop": "dos",
+def create_categories(df):
 
-        # Probe
-        "ipsweep": "probe",
-        "nmap": "probe",
-        "portsweep": "probe",
-        "satan": "probe",
-
-        # Remote to Local
-        "ftp_write": "r2l",
-        "guess_passwd": "r2l",
-        "imap": "r2l",
-        "multihop": "r2l",
-        "phf": "r2l",
-        "spy": "r2l",
-        "warezclient": "r2l",
-        "warezmaster": "r2l",
-
-        # User to Root
-        "buffer_overflow": "u2r",
-        "loadmodule": "u2r",
-        "perl": "u2r",
-        "rootkit": "u2r"
-    }
-
-    df["attack_category"] = df["label"].map(
-        lambda x: "normal" if x == "normal"
-        else attack_mapping.get(x, "other")
+    df["attack_category"] = (
+        df["label"]
+        .str.lower()
+        .map(ATTACK_MAPPING)
+        .fillna("other")
     )
 
     return df
 
 
-def preprocess_data(df, encoder=None, scaler=None, training=True):
-    """Encode categorical features and scale numerical features."""
+# ---------------------------------------------------------
+# MAIN PREPROCESSING
+# ---------------------------------------------------------
 
-    df = df.copy()
-
-    # Remove difficulty because it is not a network feature
-    df = df.drop(columns=["difficulty"])
-
-    # Separate target information
-    labels = df["label"]
-    attack_categories = df["attack_category"]
-
-    features = df.drop(
-        columns=["label", "attack_category"]
-    )
-
-    categorical_columns = [
-        "protocol_type",
-        "service",
-        "flag"
-    ]
-
-    numerical_columns = [
-        column
-        for column in features.columns
-        if column not in categorical_columns
-    ]
-
-    # Encode categorical columns
-    if training:
-        encoders = {}
-
-        for column in categorical_columns:
-            encoder_column = LabelEncoder()
-            features[column] = encoder_column.fit_transform(
-                features[column].astype(str)
-            )
-            encoders[column] = encoder_column
-
-    else:
-        encoders = encoder
-
-        for column in categorical_columns:
-            features[column] = encoders[column].transform(
-                features[column].astype(str)
-            )
-
-    # Scale numerical features
-    if training:
-        scaler = StandardScaler()
-        features[numerical_columns] = scaler.fit_transform(
-            features[numerical_columns]
-        )
-    else:
-        features[numerical_columns] = scaler.transform(
-            features[numerical_columns]
-        )
-
-    return (
-        features,
-        labels,
-        attack_categories,
-        encoders,
-        scaler
-    )
+print("=" * 60)
+print("XRL-GUARD DATA PREPROCESSING")
+print("=" * 60)
 
 
-def main():
-
-    print("=" * 60)
-    print("XRL-GUARD DATASET PREPROCESSOR")
-    print("=" * 60)
-
-    train_path = DATA_DIR / "KDDTrain+.txt"
-    test_path = DATA_DIR / "KDDTest+.txt"
-
-    print("\nLoading datasets...")
-
-    train_df = load_dataset(train_path)
-    test_df = load_dataset(test_path)
-
-    print(f"Training records: {len(train_df)}")
-    print(f"Testing records : {len(test_df)}")
-
-    print("\nConverting attack labels...")
-
-    train_df = convert_attack_labels(train_df)
-    test_df = convert_attack_labels(test_df)
-
-    print("\nTraining attack categories:")
-    print(train_df["attack_category"].value_counts())
-
-    print("\nTesting attack categories:")
-    print(test_df["attack_category"].value_counts())
-
-    print("\nPreprocessing training data...")
-
-    (
-        X_train,
-        y_train,
-        category_train,
-        encoders,
-        scaler
-    ) = preprocess_data(
-        train_df,
-        training=True
-    )
-
-    print("Training preprocessing completed.")
-
-    print("\nPreprocessing testing data...")
-
-    (
-        X_test,
-        y_test,
-        category_test,
-        _,
-        _
-    ) = preprocess_data(
-        test_df,
-        encoder=encoders,
-        scaler=scaler,
-        training=False
-    )
-
-    print("Testing preprocessing completed.")
-
-    # Save processed feature datasets
-    X_train.to_csv(
-        PROCESSED_DIR / "X_train.csv",
-        index=False
-    )
-
-    X_test.to_csv(
-        PROCESSED_DIR / "X_test.csv",
-        index=False
-    )
-
-    y_train.to_csv(
-        PROCESSED_DIR / "y_train.csv",
-        index=False
-    )
-
-    y_test.to_csv(
-        PROCESSED_DIR / "y_test.csv",
-        index=False
-    )
-
-    category_train.to_csv(
-        PROCESSED_DIR / "category_train.csv",
-        index=False
-    )
-
-    category_test.to_csv(
-        PROCESSED_DIR / "category_test.csv",
-        index=False
-    )
-
-    print("\nProcessed files saved to:")
-    print(PROCESSED_DIR)
-
-    print("\nProcessed training shape:")
-    print(X_train.shape)
-
-    print("\nProcessed testing shape:")
-    print(X_test.shape)
-
-    print("\nFeature data preview:")
-    print(X_train.head())
-
-    print("\n" + "=" * 60)
-    print("DATASET PREPROCESSING COMPLETED")
-    print("=" * 60)
+train_path = DATA_DIR / "KDDTrain+.txt"
+test_path = DATA_DIR / "KDDTest+.txt"
 
 
-if __name__ == "__main__":
-    main()
+print("\nLoading training data...")
+train_df = load_dataset(train_path)
+
+print("Loading testing data...")
+test_df = load_dataset(test_path)
+
+
+# ---------------------------------------------------------
+# CREATE ATTACK CATEGORIES
+# ---------------------------------------------------------
+
+train_df = create_categories(train_df)
+test_df = create_categories(test_df)
+
+
+print("\nTraining attack categories:")
+print(train_df["attack_category"].value_counts())
+
+print("\nTesting attack categories:")
+print(test_df["attack_category"].value_counts())
+
+
+# ---------------------------------------------------------
+# SEPARATE FEATURES
+# ---------------------------------------------------------
+
+categorical_columns = [
+    "protocol_type",
+    "service",
+    "flag"
+]
+
+drop_columns = [
+    "label",
+    "difficulty",
+    "attack_category"
+]
+
+X_train = train_df.drop(columns=drop_columns)
+X_test = test_df.drop(columns=drop_columns)
+
+y_train = train_df["attack_category"]
+y_test = test_df["attack_category"]
+
+
+# ---------------------------------------------------------
+# ONE-HOT ENCODE CATEGORICAL FEATURES
+# ---------------------------------------------------------
+
+print("\nApplying one-hot encoding...")
+
+combined = pd.concat(
+    [X_train, X_test],
+    axis=0,
+    ignore_index=True
+)
+
+combined = pd.get_dummies(
+    combined,
+    columns=categorical_columns,
+    dtype=float
+)
+
+X_train = combined.iloc[:len(X_train)].copy()
+X_test = combined.iloc[len(X_train):].copy()
+
+
+# ---------------------------------------------------------
+# SCALE FEATURES
+# ---------------------------------------------------------
+
+print("Scaling numerical features...")
+
+scaler = StandardScaler()
+
+X_train = pd.DataFrame(
+    scaler.fit_transform(X_train),
+    columns=X_train.columns
+)
+
+X_test = pd.DataFrame(
+    scaler.transform(X_test),
+    columns=X_test.columns
+)
+
+
+# ---------------------------------------------------------
+# SAVE PROCESSED DATA
+# ---------------------------------------------------------
+
+X_train.to_csv(
+    PROCESSED_DIR / "X_train.csv",
+    index=False
+)
+
+X_test.to_csv(
+    PROCESSED_DIR / "X_test.csv",
+    index=False
+)
+
+y_train.to_csv(
+    PROCESSED_DIR / "category_train.csv",
+    index=False
+)
+
+y_test.to_csv(
+    PROCESSED_DIR / "category_test.csv",
+    index=False
+)
+
+
+# ---------------------------------------------------------
+# FINAL INFORMATION
+# ---------------------------------------------------------
+
+print("\n" + "=" * 60)
+print("PREPROCESSING COMPLETED")
+print("=" * 60)
+
+print("\nProcessed training shape :", X_train.shape)
+print("Processed testing shape  :", X_test.shape)
+
+print("\nTraining categories:")
+print(y_train.value_counts())
+
+print("\nTesting categories:")
+print(y_test.value_counts())
+
+print("\nProcessed files saved in:")
+print(PROCESSED_DIR)
+
+print("=" * 60)
