@@ -21,43 +21,48 @@ class XRLGuardRuntimeMonitor:
         print("-" * 60)
 
         print(
-            "Incident ID :",
+            "Incident ID      :",
             incident["incident_id"]
         )
 
         print(
-            "Record ID   :",
+            "Record ID        :",
             incident["record_id"]
         )
 
         print(
-            "Category    :",
+            "Category         :",
             incident["category"]
         )
 
         print(
-            "Severity    :",
+            "Severity         :",
             incident["severity"]
         )
 
         print(
-            "Action      :",
-            incident["action"]
+            "Suggested Action :",
+            incident["suggested_action"]
         )
 
         print(
-            "Confidence  :",
+            "Model Confidence :",
             f"{incident['confidence']:.2%}"
         )
 
         print(
-            "Recommendation:",
+            "Recommendation   :",
             incident["recommendation"]
         )
 
         print(
-            "Reason      :",
+            "Reason           :",
             incident["reason"]
+        )
+
+        print(
+            "User Action      :",
+            incident["user_action_status"]
         )
 
         return incident

@@ -17,7 +17,7 @@ SRC_PATH = PROJECT_ROOT / "src"
 
 sys.path.insert(0, str(SRC_PATH))
 
-from agent import XRLGuardAgent
+from decision_engine import XRLGuardDecisionEngine
 
 
 # ---------------------------------------------------------
@@ -42,18 +42,6 @@ LOG_PATH = str(
 
 
 # ---------------------------------------------------------
-# ACTION NAMES
-# ---------------------------------------------------------
-
-ACTION_NAMES = {
-    0: "Allow",
-    1: "Monitor",
-    2: "Block",
-    3: "Quarantine"
-}
-
-
-# ---------------------------------------------------------
 # SEVERITY
 # ---------------------------------------------------------
 
@@ -61,9 +49,9 @@ SEVERITY = {
     "normal": "LOW",
     "dos": "HIGH",
     "probe": "HIGH",
-    "other": "HIGH",
     "r2l": "CRITICAL",
-    "u2r": "CRITICAL"
+    "u2r": "CRITICAL",
+    "other": "HIGH"
 }
 
 
@@ -75,14 +63,20 @@ class XRLGuardRuntimeEngine:
 
     def __init__(self):
 
-        print("Loading XRL-Guard runtime engine...")
+        print("Loading XRL-GUARD runtime engine...")
 
-        # Load features
+        # -------------------------------------------------
+        # LOAD PROCESSED TEST FEATURES
+        # -------------------------------------------------
+
         self.features = pd.read_csv(
             FEATURE_PATH
         )
 
-        # Load categories
+        # -------------------------------------------------
+        # LOAD TEST CATEGORIES
+        # -------------------------------------------------
+
         self.categories = (
             pd.read_csv(CATEGORY_PATH)
             .iloc[:, 0]
@@ -92,7 +86,10 @@ class XRLGuardRuntimeEngine:
             .reset_index(drop=True)
         )
 
-        # Check data consistency
+        # -------------------------------------------------
+        # DATA CONSISTENCY CHECK
+        # -------------------------------------------------
+
         if len(self.features) != len(self.categories):
 
             raise ValueError(
@@ -104,17 +101,28 @@ class XRLGuardRuntimeEngine:
             f"{len(self.features)}"
         )
 
-        # Load trained XRL agent
-        print("Loading XRL-Guard agent...")
+        # -------------------------------------------------
+        # LOAD DECISION ENGINE
+        # -------------------------------------------------
 
-        self.agent = XRLGuardAgent(
+        print(
+            "Loading XRL-GUARD decision engine..."
+        )
+
+        self.engine = XRLGuardDecisionEngine(
             MODEL_PATH
         )
 
-        print("Agent loaded successfully.")
+        print(
+            "Decision engine loaded successfully."
+        )
 
-        # Prepare incident log
+        # -------------------------------------------------
+        # PREPARE INCIDENT LOG
+        # -------------------------------------------------
+
         self._prepare_log()
+
 
     # -----------------------------------------------------
     # PREPARE INCIDENT LOG
@@ -127,25 +135,128 @@ class XRLGuardRuntimeEngine:
             exist_ok=True
         )
 
+        columns = [
+            "incident_id",
+            "timestamp",
+            "record_id",
+            "category",
+            "severity",
+            "suggested_action",
+            "confidence",
+            "recommendation",
+            "reason",
+            "user_decision",
+            "action_status",
+            "deny_reason"
+        ]
+
+        # -------------------------------------------------
+        # CREATE LOG IF IT DOES NOT EXIST
+        # -------------------------------------------------
+
         if not os.path.exists(LOG_PATH):
 
-            columns = [
-                "incident_id",
-                "timestamp",
-                "record_id",
-                "category",
-                "severity",
-                "suggested_action",
-                "confidence",
-                "risk_level",
-                "recommendation",
-                "reason",
-                "user_action_status"
-            ]
+            pd.DataFrame(
+                {
+                    column: pd.Series(dtype="object")
+                    for column in columns
+                }
+            ).to_csv(
+                LOG_PATH,
+                index=False
+            )
+
+            return
+
+        # -------------------------------------------------
+        # READ EXISTING LOG
+        # -------------------------------------------------
+
+        try:
+
+            data = pd.read_csv(
+                LOG_PATH
+            )
+
+        except pd.errors.EmptyDataError:
 
             pd.DataFrame(
-                columns=columns
+                {
+                    column: pd.Series(dtype="object")
+                    for column in columns
+                }
             ).to_csv(
+                LOG_PATH,
+                index=False
+            )
+
+            return
+
+        # -------------------------------------------------
+        # ADD MISSING COLUMNS
+        # -------------------------------------------------
+
+        changed = False
+
+        for column in columns:
+
+            if column not in data.columns:
+
+                if column == "user_decision":
+
+                    data[column] = "PENDING"
+
+                elif column == "action_status":
+
+                    data[column] = "PENDING"
+
+                else:
+
+                    data[column] = ""
+
+                changed = True
+
+        # -------------------------------------------------
+        # FIX TEXT COLUMN TYPES
+        # -------------------------------------------------
+
+        text_columns = [
+            "incident_id",
+            "timestamp",
+            "record_id",
+            "category",
+            "severity",
+            "suggested_action",
+            "recommendation",
+            "reason",
+            "user_decision",
+            "action_status",
+            "deny_reason"
+        ]
+
+        for column in text_columns:
+
+            if column in data.columns:
+
+                data[column] = (
+                    data[column]
+                    .fillna("")
+                    .astype(str)
+                )
+
+        # -------------------------------------------------
+        # KEEP COLUMN ORDER
+        # -------------------------------------------------
+
+        data = data[columns]
+
+        # -------------------------------------------------
+        # SAVE UPDATED LOG
+        # -------------------------------------------------
+
+        if changed:
+
+            data.to_csv(
                 LOG_PATH,
                 index=False
             )
@@ -158,7 +269,10 @@ class XRLGuardRuntimeEngine:
 
         record_id = int(record_id)
 
-        # Validate record ID
+        # -------------------------------------------------
+        # VALIDATE RECORD ID
+        # -------------------------------------------------
+
         if (
             record_id < 0
             or record_id >= len(self.features)
@@ -168,39 +282,52 @@ class XRLGuardRuntimeEngine:
                 "Invalid record ID."
             )
 
-        # Get network features
+        # -------------------------------------------------
+        # GET NETWORK FEATURES
+        # -------------------------------------------------
+
         observation = (
             self.features.iloc[record_id]
             .values
             .astype("float32")
         )
 
-        # Ask XRL-Guard agent for recommendation
-        result = self.agent.analyze(
+        # -------------------------------------------------
+        # XRL-GUARD DECISION
+        # -------------------------------------------------
+
+        result = self.engine.get_decision(
             observation
         )
 
-        # Get category
+        # -------------------------------------------------
+        # GET CATEGORY
+        # -------------------------------------------------
+
         category = self.categories.iloc[
             record_id
         ]
 
-        # Get suggested action
-        suggested_action = str(
-            result["action"]
-        )
+        # -------------------------------------------------
+        # CREATE INCIDENT ID
+        # -------------------------------------------------
 
-        # Create unique incident ID
         incident_id = (
             f"INC-{uuid.uuid4().hex[:8].upper()}"
         )
 
-        # Current timestamp
+        # -------------------------------------------------
+        # CURRENT TIMESTAMP
+        # -------------------------------------------------
+
         timestamp = datetime.now().strftime(
             "%Y-%m-%d %H:%M:%S"
         )
 
-        # Create incident
+        # -------------------------------------------------
+        # CREATE INCIDENT
+        # -------------------------------------------------
+
         incident = {
 
             "incident_id":
@@ -222,7 +349,7 @@ class XRLGuardRuntimeEngine:
                 ),
 
             "suggested_action":
-                suggested_action,
+                result["action"],
 
             "confidence":
                 round(
@@ -230,20 +357,24 @@ class XRLGuardRuntimeEngine:
                     4
                 ),
 
-            "risk_level":
-                result["risk_level"],
-
             "recommendation":
-                result["recommendation"],
+                result["action"],
 
             "reason":
                 result["reason"],
 
-            "user_action_status":
-                "PENDING"
+            "user_decision":
+                "PENDING",
+
+            "action_status":
+                "PENDING",
+
+            "deny_reason":
+                ""
         }
 
         return incident
+
 
     # -----------------------------------------------------
     # GENERATE LIVE INCIDENT
@@ -265,6 +396,7 @@ class XRLGuardRuntimeEngine:
 
         return incident
 
+
     # -----------------------------------------------------
     # SAVE INCIDENT
     # -----------------------------------------------------
@@ -279,6 +411,7 @@ class XRLGuardRuntimeEngine:
             header=False,
             index=False
         )
+
 
     # -----------------------------------------------------
     # GET RECENT INCIDENTS
@@ -295,9 +428,15 @@ class XRLGuardRuntimeEngine:
 
             return []
 
-        data = pd.read_csv(
-            LOG_PATH
-        )
+        try:
+
+            data = pd.read_csv(
+                LOG_PATH
+            )
+
+        except pd.errors.EmptyDataError:
+
+            return []
 
         if data.empty:
 
@@ -314,32 +453,54 @@ class XRLGuardRuntimeEngine:
         return data.to_dict(
             orient="records"
         )
-        # -----------------------------------------------------
-    # MARK USER ACTION AS COMPLETED
+
+
+    # -----------------------------------------------------
+    # ACCEPT USER DECISION
     # -----------------------------------------------------
 
-    def complete_incident(self, incident_id):
+    def accept_incident(self, incident_id):
 
         if not os.path.exists(LOG_PATH):
             return False
 
-        data = pd.read_csv(LOG_PATH)
+        try:
+            data = pd.read_csv(LOG_PATH)
+
+        except pd.errors.EmptyDataError:
+            return False
 
         if data.empty:
             return False
 
-        matches = (
-            data["incident_id"].astype(str)
-            == str(incident_id)
-        )
+        # Make sure text columns can safely store strings
+        for column in [
+            "user_decision",
+            "action_status",
+            "deny_reason"
+        ]:
 
-        if not matches.any():
+            if column not in data.columns:
+                data[column] = ""
+
+            data[column] = (
+                data[column]
+                .fillna("")
+                .astype("object")
+            )
+
+        matches = data.index[
+            data["incident_id"].astype(str) == str(incident_id)
+        ]
+
+        if len(matches) == 0:
             return False
 
-        data.loc[
-            matches,
-            "user_action_status"
-        ] = "COMPLETED"
+        index = matches[0]
+
+        data.loc[index, "user_decision"] = "ACCEPTED"
+        data.loc[index, "action_status"] = "COMPLETED"
+        data.loc[index, "deny_reason"] = ""
 
         data.to_csv(
             LOG_PATH,
@@ -348,6 +509,69 @@ class XRLGuardRuntimeEngine:
 
         return True
 
+
+    # -----------------------------------------------------
+    # DENY USER DECISION
+    # -----------------------------------------------------
+
+    def deny_incident(self, incident_id, deny_reason=""):
+
+        if not os.path.exists(LOG_PATH):
+            return False
+
+        try:
+            data = pd.read_csv(LOG_PATH)
+
+        except pd.errors.EmptyDataError:
+            return False
+
+        if data.empty:
+            return False
+
+        # Make sure required columns exist
+        if "user_decision" not in data.columns:
+            data["user_decision"] = ""
+
+        if "action_status" not in data.columns:
+            data["action_status"] = ""
+
+        if "deny_reason" not in data.columns:
+            data["deny_reason"] = ""
+
+        # Force text columns to object/string-compatible dtype
+        for column in [
+            "user_decision",
+            "action_status",
+            "deny_reason"
+        ]:
+
+            data[column] = (
+                data[column]
+                .fillna("")
+                .astype("object")
+            )
+
+        matches = data.index[
+            data["incident_id"].astype(str) == str(incident_id)
+        ]
+
+        if len(matches) == 0:
+            return False
+
+        index = matches[0]
+
+        data.loc[index, "user_decision"] = "DENIED"
+        data.loc[index, "action_status"] = "NOT_PERFORMED"
+        data.loc[index, "deny_reason"] = str(
+            deny_reason
+        ).strip()
+
+        data.to_csv(
+            LOG_PATH,
+            index=False
+        )
+
+        return True
 
 # ---------------------------------------------------------
 # TEST RUNTIME ENGINE
@@ -416,13 +640,8 @@ if __name__ == "__main__":
     )
 
     print(
-        "Confidence       :",
+        "Model Confidence :",
         f"{incident['confidence']:.2%}"
-    )
-
-    print(
-        "Risk Level       :",
-        incident["risk_level"]
     )
 
     print(
@@ -436,8 +655,13 @@ if __name__ == "__main__":
     )
 
     print(
-        "User Action      :",
-        incident["user_action_status"]
+        "User Decision    :",
+        incident["user_decision"]
+    )
+
+    print(
+        "Action Status    :",
+        incident["action_status"]
     )
 
     print()

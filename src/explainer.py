@@ -15,56 +15,17 @@ ACTION_NAMES = {
 }
 
 
-FEATURE_NAMES = [
-    "duration",
-    "protocol_type",
-    "service",
-    "flag",
-    "src_bytes",
-    "dst_bytes",
-    "land",
-    "wrong_fragment",
-    "urgent",
-    "hot",
-    "num_failed_logins",
-    "logged_in",
-    "num_compromised",
-    "root_shell",
-    "su_attempted",
-    "num_root",
-    "num_file_creations",
-    "num_shells",
-    "num_access_files",
-    "num_outbound_cmds",
-    "is_host_login",
-    "is_guest_login",
-    "count",
-    "srv_count",
-    "serror_rate",
-    "srv_serror_rate",
-    "rerror_rate",
-    "srv_rerror_rate",
-    "same_srv_rate",
-    "diff_srv_rate",
-    "srv_diff_host_rate",
-    "dst_host_count",
-    "dst_host_srv_count",
-    "dst_host_same_srv_rate",
-    "dst_host_diff_srv_rate",
-    "dst_host_same_src_port_rate",
-    "dst_host_srv_diff_host_rate",
-    "dst_host_serror_rate",
-    "dst_host_srv_serror_rate",
-    "dst_host_rerror_rate",
-    "dst_host_srv_rerror_rate"
-]
-
-
 class XRLGuardExplainer:
 
     def __init__(self, model_path):
 
         self.model = PPO.load(model_path)
+
+        # Get the actual feature names used by the processed dataset
+        self.feature_names = pd.read_csv(
+            DATA_PATH,
+            nrows=0
+        ).columns.tolist()
 
     def predict_action(self, observation):
 
@@ -130,6 +91,9 @@ class XRLGuardExplainer:
         # ---------------------------------------------
         # BASELINE
         # ---------------------------------------------
+        # Zero represents the scaled baseline for
+        # numerical features and the inactive state
+        # for one-hot features.
 
         baseline = np.zeros_like(
             observation,
@@ -142,7 +106,9 @@ class XRLGuardExplainer:
 
         importance = []
 
-        for index in range(len(observation)):
+        for index in range(
+            len(observation)
+        ):
 
             modified_observation = observation.copy()
 
@@ -179,17 +145,32 @@ class XRLGuardExplainer:
 
         for index in ranked_indices[:10]:
 
+            if index < len(self.feature_names):
+
+                feature_name = (
+                    self.feature_names[index]
+                )
+
+            else:
+
+                feature_name = (
+                    f"feature_{index}"
+                )
+
             if importance[index] > 0:
+
                 effect = "supports"
 
             elif importance[index] < 0:
+
                 effect = "opposes"
 
             else:
+
                 effect = "neutral"
 
             important_features.append({
-                "feature": FEATURE_NAMES[index],
+                "feature": feature_name,
                 "value": float(
                     observation[index]
                 ),
@@ -199,11 +180,82 @@ class XRLGuardExplainer:
                 "effect": effect
             })
 
+        # ---------------------------------------------
+        # ACTION EXPLANATION
+        # ---------------------------------------------
+
+        positive_features = [
+            item["feature"]
+            for item in important_features
+            if item["effect"] == "supports"
+        ]
+
+        negative_features = [
+            item["feature"]
+            for item in important_features
+            if item["effect"] == "opposes"
+        ]
+
+        if positive_features:
+
+            support_text = ", ".join(
+                positive_features[:3]
+            )
+
+        else:
+
+            support_text = "the observed traffic features"
+
+        if negative_features:
+
+            oppose_text = ", ".join(
+                negative_features[:3]
+            )
+
+        else:
+
+            oppose_text = "no major opposing features"
+
+        if action == 0:
+
+            reason = (
+                "The PPO agent recommends Allow. "
+                "The decision is mainly supported by "
+                f"{support_text}."
+            )
+
+        elif action == 1:
+
+            reason = (
+                "The PPO agent recommends Monitor. "
+                "The decision is mainly supported by "
+                f"{support_text}."
+            )
+
+        elif action == 2:
+
+            reason = (
+                "The PPO agent recommends Block. "
+                "The decision is mainly supported by "
+                f"{support_text}."
+            )
+
+        else:
+
+            reason = (
+                "The PPO agent recommends Quarantine. "
+                "The decision is mainly supported by "
+                f"{support_text}."
+            )
+
         return {
             "action": action,
             "action_name": ACTION_NAMES[action],
             "confidence": float(confidence),
-            "important_features": important_features
+            "reason": reason,
+            "important_features": important_features,
+            "supporting_features": positive_features[:5],
+            "opposing_features": negative_features[:5]
         }
 
 
@@ -252,13 +304,18 @@ if __name__ == "__main__":
     print("=" * 60)
 
     print(
-        "\nPredicted action :",
+        "\nRecommended action :",
         result["action_name"]
     )
 
     print(
-        "Confidence       :",
-        f"{result['confidence']:.4f}"
+        "Model confidence   :",
+        f"{result['confidence']:.2%}"
+    )
+
+    print(
+        "\nReason:",
+        result["reason"]
     )
 
     print("\nImportant features:")
@@ -266,10 +323,28 @@ if __name__ == "__main__":
     for item in result["important_features"]:
 
         print(
-            f"{item['feature']:35s} "
+            f"{item['feature']:40s} "
             f"Value={item['value']:10.4f} "
             f"Impact={item['importance']:+.6f} "
             f"{item['effect']}"
+        )
+
+    print("\nSupporting features:")
+
+    for feature in result["supporting_features"]:
+
+        print(
+            " -",
+            feature
+        )
+
+    print("\nOpposing features:")
+
+    for feature in result["opposing_features"]:
+
+        print(
+            " -",
+            feature
         )
 
     print("\n" + "=" * 60)

@@ -88,28 +88,8 @@ class XRLGuardEnv(gym.Env):
         # BALANCED CATEGORY SAMPLING
         # -------------------------------------------------
 
-        #category = self.np_random.choice(
-         #   available_categories
-        #)
-        sampling_categories = [
-            "normal",
-            "dos",
-            "probe",
-            "r2l",
-            "u2r"
-        ]
-
-        sampling_weights = [
-            0.20,   # normal
-            0.20,   # dos
-            0.20,   # probe
-            0.30,   # r2l
-            0.10    # u2r
-        ]
-
         category = self.np_random.choice(
-            sampling_categories,
-            p=sampling_weights
+            available_categories
         )
 
         self.current_index = self.np_random.choice(
@@ -161,7 +141,6 @@ class XRLGuardEnv(gym.Env):
         # -------------------------------------------------
         # SIMPLE REWARD
         # -------------------------------------------------
-
         if action == expected_action:
             reward = 1
         else:

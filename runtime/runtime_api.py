@@ -1,13 +1,19 @@
 import sys
 from pathlib import Path
 
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from flask_cors import CORS
 
-PROJECT_ROOT = Path(__file__).resolve().parent.parent
-SRC_PATH = PROJECT_ROOT / "src"
 
-sys.path.insert(0, str(SRC_PATH))
+# ---------------------------------------------------------
+# PROJECT PATHS
+# ---------------------------------------------------------
+
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+RUNTIME_PATH = Path(__file__).resolve().parent
+
+sys.path.insert(0, str(RUNTIME_PATH))
+
 
 from runtime_engine import XRLGuardRuntimeEngine
 
@@ -57,7 +63,8 @@ def home():
             "/api/status",
             "/api/incidents",
             "/api/generate",
-            "/api/incidents/<incident_id>/complete"
+            "/api/incidents/<incident_id>/accept",
+            "/api/incidents/<incident_id>/deny"
         ]
     })
 
@@ -108,41 +115,145 @@ def incidents():
 )
 def generate():
 
-    incident = engine.generate_incident()
+    try:
 
-    return jsonify({
-        "success": True,
-        "incident": incident
-    })
+        incident = engine.generate_incident()
 
+        return jsonify({
+            "success": True,
+            "incident": incident
+        })
 
-# ---------------------------------------------------------
-# MARK USER ACTION AS COMPLETED
-# ---------------------------------------------------------
-
-@app.route(
-    "/api/incidents/<incident_id>/complete",
-    methods=["POST"]
-)
-def complete_incident(incident_id):
-
-    success = engine.complete_incident(
-        incident_id
-    )
-
-    if not success:
+    except Exception as error:
 
         return jsonify({
             "success": False,
-            "message": "Incident not found."
-        }), 404
+            "message": str(error)
+        }), 500
 
-    return jsonify({
-        "success": True,
-        "message": "User action marked as completed.",
-        "incident_id": incident_id,
-        "user_action_status": "COMPLETED"
-    })
+
+# ---------------------------------------------------------
+# ACCEPT INCIDENT
+# ---------------------------------------------------------
+
+@app.route(
+    "/api/incidents/<incident_id>/accept",
+    methods=["POST"]
+)
+def accept_incident(incident_id):
+
+    try:
+
+        success = engine.accept_incident(
+            incident_id
+        )
+
+        if not success:
+
+            return jsonify({
+                "success": False,
+                "message": "Incident not found."
+            }), 404
+
+        return jsonify({
+            "success": True,
+            "message":
+                "Recommendation accepted. "
+                "User action marked as completed.",
+            "incident_id":
+                incident_id,
+            "user_decision":
+                "ACCEPTED",
+            "action_status":
+                "COMPLETED"
+        })
+
+    except Exception as error:
+
+        return jsonify({
+            "success": False,
+            "message": str(error)
+        }), 500
+
+
+# ---------------------------------------------------------
+# DENY INCIDENT
+# ---------------------------------------------------------
+
+@app.route(
+    "/api/incidents/<incident_id>/deny",
+    methods=["POST"]
+)
+def deny_incident(incident_id):
+
+    try:
+
+        data = request.get_json(
+            silent=True
+        )
+
+        if data is None:
+
+            data = {}
+
+        deny_reason = data.get(
+            "reason",
+            ""
+        )
+
+        deny_reason = str(
+            deny_reason
+        ).strip()
+
+        # -------------------------------------------------
+        # REASON IS REQUIRED
+        # -------------------------------------------------
+
+        if not deny_reason:
+
+            return jsonify({
+                "success": False,
+                "message":
+                    "A reason is required when denying a recommendation."
+            }), 400
+
+        # -------------------------------------------------
+        # DENY INCIDENT
+        # -------------------------------------------------
+
+        success = engine.deny_incident(
+            incident_id,
+            deny_reason
+        )
+
+        if not success:
+
+            return jsonify({
+                "success": False,
+                "message": "Incident not found."
+            }), 404
+
+        return jsonify({
+            "success": True,
+            "message":
+                "Recommendation denied. "
+                "Recommended action was not performed.",
+            "incident_id":
+                incident_id,
+            "user_decision":
+                "DENIED",
+            "action_status":
+                "NOT_PERFORMED",
+            "deny_reason":
+                deny_reason
+        })
+
+    except Exception as error:
+
+        return jsonify({
+            "success": False,
+            "message": str(error)
+        }), 500
 
 
 # ---------------------------------------------------------
@@ -155,12 +266,19 @@ if __name__ == "__main__":
 
     print("=" * 60)
 
-    print("XRL-GUARD RUNTIME API")
+    print(
+        "XRL-GUARD RUNTIME API"
+    )
 
     print("=" * 60)
 
     print(
         "HTTPS: https://127.0.0.1:5001"
+    )
+
+    print(
+        "API Status:"
+        " https://127.0.0.1:5001/api/status"
     )
 
     print("=" * 60)

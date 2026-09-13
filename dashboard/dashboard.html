@@ -3,297 +3,375 @@
 
 <head>
 
-    <meta charset="UTF-8">
+<meta charset="UTF-8">
 
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0">
 
-    <title>XRL-Guard Dashboard</title>
+<title>XRL-Guard Dashboard</title>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    <style>
+<style>
 
-        * {
-            box-sizing: border-box;
-        }
+* {
+    box-sizing: border-box;
+}
 
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background: #f4f6f9;
-            color: #1f2937;
-        }
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f4f6f9;
+    color: #1f2937;
+}
 
-        .header {
-            background: #111827;
-            color: white;
-            padding: 25px 35px;
-        }
+.header {
+    background: #111827;
+    color: white;
+    padding: 25px 35px;
+}
 
-        .header h1 {
-            margin: 0;
-            font-size: 28px;
-        }
+.header h1 {
+    margin: 0;
+    font-size: 28px;
+}
 
-        .header p {
-            margin: 8px 0 0;
-            color: #cbd5e1;
-        }
+.header p {
+    margin: 8px 0 0;
+    color: #cbd5e1;
+}
 
-        .container {
-            max-width: 1400px;
-            margin: auto;
-            padding: 30px;
-        }
+.container {
+    max-width: 1400px;
+    margin: auto;
+    padding: 30px;
+}
 
-        .cards {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 20px;
-            margin-bottom: 25px;
-        }
+.cards {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    margin-bottom: 25px;
+}
 
-        .card {
-            background: white;
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-        }
+.card {
+    background: white;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
 
-        .card-title {
-            color: #64748b;
-            font-size: 14px;
-            margin-bottom: 10px;
-        }
+.card-title {
+    color: #64748b;
+    font-size: 14px;
+    margin-bottom: 10px;
+}
 
-        .card-value {
-            font-size: 30px;
-            font-weight: bold;
-        }
+.card-value {
+    font-size: 30px;
+    font-weight: bold;
+}
 
-        .green {
-            color: #16a34a;
-        }
+.green {
+    color: #16a34a;
+}
 
-        .red {
-            color: #dc2626;
-        }
+.red {
+    color: #dc2626;
+}
 
-        .blue {
-            color: #2563eb;
-        }
+.blue {
+    color: #2563eb;
+}
 
-        .purple {
-            color: #7c3aed;
-        }
+.purple {
+    color: #7c3aed;
+}
 
-        .grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 25px;
-            margin-bottom: 25px;
-        }
+.grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 25px;
+    margin-bottom: 25px;
+}
 
-        .panel {
-            background: white;
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-            margin-bottom: 25px;
-        }
+.panel {
+    background: white;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    margin-bottom: 25px;
+}
 
-        .panel h2 {
-            margin-top: 0;
-            margin-bottom: 20px;
-            font-size: 20px;
-        }
+.panel h2 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 20px;
+}
 
-        .chart-box {
-            height: 320px;
-        }
+.chart-box {
+    height: 320px;
+}
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
 
-        th {
-            background: #f1f5f9;
-            text-align: left;
-            padding: 14px;
-        }
+th {
+    background: #f1f5f9;
+    text-align: left;
+    padding: 14px;
+    white-space: nowrap;
+}
 
-        td {
-            padding: 14px;
-            border-bottom: 1px solid #e5e7eb;
-        }
+td {
+    padding: 14px;
+    border-bottom: 1px solid #e5e7eb;
+    vertical-align: top;
+}
 
-        .badge {
-            padding: 5px 10px;
-            border-radius: 15px;
-            font-size: 12px;
-            font-weight: bold;
-        }
+.badge {
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 12px;
+    font-weight: bold;
+}
 
-        .normal {
-            background: #dcfce7;
-            color: #166534;
-        }
+.normal {
+    background: #dcfce7;
+    color: #166534;
+}
 
-        .dos {
-            background: #fee2e2;
-            color: #991b1b;
-        }
+.dos {
+    background: #fee2e2;
+    color: #991b1b;
+}
 
-        .probe {
-            background: #fef3c7;
-            color: #92400e;
-        }
+.probe {
+    background: #fef3c7;
+    color: #92400e;
+}
 
-        .r2l {
-            background: #fce7f3;
-            color: #9d174d;
-        }
+.r2l {
+    background: #fce7f3;
+    color: #9d174d;
+}
 
-        .u2r {
-            background: #ede9fe;
-            color: #5b21b6;
-        }
+.u2r {
+    background: #ede9fe;
+    color: #5b21b6;
+}
 
-        .other {
-            background: #e0f2fe;
-            color: #075985;
-        }
+.other {
+    background: #e0f2fe;
+    color: #075985;
+}
 
-        .allow {
-            color: #16a34a;
-            font-weight: bold;
-        }
+.allow {
+    color: #16a34a;
+    font-weight: bold;
+}
 
-        .monitor {
-            color: #ca8a04;
-            font-weight: bold;
-        }
+.monitor {
+    color: #ca8a04;
+    font-weight: bold;
+}
 
-        .block {
-            color: #dc2626;
-            font-weight: bold;
-        }
+.block {
+    color: #dc2626;
+    font-weight: bold;
+}
 
-        .quarantine {
-            color: #7c3aed;
-            font-weight: bold;
-        }
+.quarantine {
+    color: #7c3aed;
+    font-weight: bold;
+}
 
-        .footer {
-            text-align: center;
-            padding: 25px;
-            color: #64748b;
-        }
+.footer {
+    text-align: center;
+    padding: 25px;
+    color: #64748b;
+}
 
-        @media (max-width: 900px) {
+@media (max-width: 900px) {
 
-            .cards {
-                grid-template-columns: repeat(2, 1fr);
-            }
+    .cards {
+        grid-template-columns: repeat(2, 1fr);
+    }
 
-            .grid {
-                grid-template-columns: 1fr;
-            }
+    .grid {
+        grid-template-columns: 1fr;
+    }
 
-        }
+}
 
-        @media (max-width: 600px) {
+@media (max-width: 600px) {
 
-            .cards {
-                grid-template-columns: 1fr;
-            }
+    .cards {
+        grid-template-columns: 1fr;
+    }
 
-            .container {
-                padding: 15px;
-            }
+    .container {
+        padding: 15px;
+    }
 
-        }
-                .live-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 15px;
-            margin-bottom: 20px;
-        }
+}
 
-        .live-button {
-            background: #2563eb;
-            color: white;
-            border: none;
-            padding: 12px 18px;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: bold;
-            cursor: pointer;
-        }
+.live-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+}
 
-        .live-button:hover {
-            background: #1d4ed8;
-        }
+.live-button {
+    background: #2563eb;
+    color: white;
+    border: none;
+    padding: 12px 18px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+}
 
-        .live-button:disabled {
-            background: #94a3b8;
-            cursor: not-allowed;
-        }
+.live-button:hover {
+    background: #1d4ed8;
+}
 
-        .live-status {
-            color: #64748b;
-            font-size: 14px;
-            margin-bottom: 15px;
-        }
+.live-button:disabled {
+    background: #94a3b8;
+    cursor: not-allowed;
+}
 
-        .live-table {
-            overflow-x: auto;
-        }
+.live-status {
+    color: #64748b;
+    font-size: 14px;
+    margin-bottom: 15px;
+}
 
-        .incident-id {
-            font-weight: bold;
-            color: #2563eb;
-        }
+.live-table {
+    overflow-x: auto;
+}
 
-        .confidence {
-            font-weight: bold;
-        }
+.incident-id {
+    font-weight: bold;
+    color: #2563eb;
+}
 
-        .empty-message {
-            text-align: center;
-            color: #64748b;
-            padding: 25px;
-        }
+.confidence {
+    font-weight: bold;
+}
 
-        .action-status {
-            font-weight: bold;
-            font-size: 13px;
-        }
+.empty-message {
+    text-align: center;
+    color: #64748b;
+    padding: 25px;
+}
 
-        .status-pending { color: #ca8a04; }
-        .status-completed { color: #16a34a; }
+.action-status {
+    font-weight: bold;
+    font-size: 13px;
+}
 
-        .complete-button {
-            background: #16a34a;
-            color: white;
-            border: none;
-            padding: 8px 12px;
-            border-radius: 6px;
-            font-size: 12px;
-            font-weight: bold;
-            cursor: pointer;
-        }
+.status-pending {
+    color: #ca8a04;
+}
 
-        .complete-button:hover { background: #15803d; }
-        .complete-button:disabled {
-            background: #94a3b8;
-            cursor: not-allowed;
-        }
+.status-completed {
+    color: #16a34a;
+}
 
-    </style>
+.status-denied {
+    color: #dc2626;
+}
+
+.status-not-performed {
+    color: #dc2626;
+}
+
+.action-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 150px;
+}
+
+.accept-button {
+    background: #16a34a;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.accept-button:hover {
+    background: #15803d;
+}
+
+.accept-button:disabled {
+    background: #94a3b8;
+    cursor: not-allowed;
+}
+
+.deny-button {
+    background: #dc2626;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.deny-button:hover {
+    background: #b91c1c;
+}
+
+.deny-button:disabled {
+    background: #94a3b8;
+    cursor: not-allowed;
+}
+
+.deny-reason {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 12px;
+    margin-top: 5px;
+}
+
+.deny-reason:focus {
+    outline: none;
+    border-color: #2563eb;
+}
+
+.explanation {
+    min-width: 350px;
+    max-width: 500px;
+    line-height: 1.5;
+    color: #374151;
+}
+
+.decision-info {
+    font-size: 12px;
+    margin-top: 6px;
+}
+
+.deny-reason-text {
+    color: #991b1b;
+    margin-top: 5px;
+    line-height: 1.4;
+}
+
+</style>
 
 </head>
 
@@ -301,126 +379,327 @@
 <body>
 
 
-    <div class="header">
+<div class="header">
 
-        <h1>XRL-Guard</h1>
+    <h1>XRL-Guard</h1>
 
-        <p>
-            Explainable Reinforcement Learning for Network Security
-        </p>
+    <p>
+        Explainable Reinforcement Learning for Network Security
+    </p>
+
+</div>
+
+
+<div class="container">
+
+
+    <!-- SUMMARY CARDS -->
+
+    <div class="cards">
+
+        <div class="card">
+
+            <div class="card-title">
+                Test Records
+            </div>
+
+            <div class="card-value purple">
+                {{ total_records }}
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <div class="card-title">
+                Accuracy
+            </div>
+
+            <div class="card-value green">
+                {{ accuracy }}%
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <div class="card-title">
+                Incorrect Decisions
+            </div>
+
+            <div class="card-value red">
+                {{ incorrect }}
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <div class="card-title">
+                Average Reward
+            </div>
+
+            <div class="card-value blue">
+                {{ avg_reward }}
+            </div>
+
+        </div>
 
     </div>
 
 
-    <div class="container">
+    <!-- CHARTS -->
 
+    <div class="grid">
 
-        <!-- SUMMARY CARDS -->
-
-        <div class="cards">
-
-
-            <div class="card">
-
-                <div class="card-title">
-                    Test Records
-                </div>
-
-                <div class="card-value purple">
-                    {{ total_records }}
-                </div>
-
-            </div>
-
-
-            <div class="card">
-
-                <div class="card-title">
-                    Accuracy
-                </div>
-
-                <div class="card-value green">
-                    {{ accuracy }}%
-                </div>
-
-            </div>
-
-
-            <div class="card">
-
-                <div class="card-title">
-                    Incorrect Decisions
-                </div>
-
-                <div class="card-value red">
-                    {{ incorrect }}
-                </div>
-
-            </div>
-
-
-            <div class="card">
-
-                <div class="card-title">
-                    Average Reward
-                </div>
-
-                <div class="card-value blue">
-                    {{ avg_reward }}
-                </div>
-
-            </div>
-
-
-        </div>
-
-
-        <!-- CHARTS -->
-
-        <div class="grid">
-
-
-            <div class="panel">
-
-                <h2>
-                    Attack Category Distribution
-                </h2>
-
-                <div class="chart-box">
-
-                    <canvas id="attackChart"></canvas>
-
-                </div>
-
-            </div>
-
-
-            <div class="panel">
-
-                <h2>
-                    Predicted Action Distribution
-                </h2>
-
-                <div class="chart-box">
-
-                    <canvas id="actionChart"></canvas>
-
-                </div>
-
-            </div>
-
-
-        </div>
-
-
-        <!-- CATEGORY RESULTS -->
 
         <div class="panel">
 
             <h2>
-                Per-Attack-Category Performance
+                Attack Category Distribution
             </h2>
 
+            <div class="chart-box">
+
+                <canvas id="attackChart"></canvas>
+
+            </div>
+
+        </div>
+
+
+        <div class="panel">
+
+            <h2>
+                Predicted Action Distribution
+            </h2>
+
+            <div class="chart-box">
+
+                <canvas id="actionChart"></canvas>
+
+            </div>
+
+        </div>
+
+
+    </div>
+
+
+    <!-- CATEGORY RESULTS -->
+
+    <div class="panel">
+
+        <h2>
+            Per-Attack-Category Performance
+        </h2>
+
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th>Category</th>
+                    <th>Total</th>
+                    <th>Correct</th>
+                    <th>Accuracy</th>
+                    <th>Expected Action</th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+                {% for item in category_results %}
+
+                <tr>
+
+                    <td>
+
+                        <span class="badge {{ item.category }}">
+
+                            {{ item.category.upper() }}
+
+                        </span>
+
+                    </td>
+
+
+                    <td>
+                        {{ item.total }}
+                    </td>
+
+
+                    <td>
+                        {{ item.correct }}
+                    </td>
+
+
+                    <td>
+                        <strong>{{ item.accuracy }}%</strong>
+                    </td>
+
+
+                    <td>
+
+                        <span class="{{ item.action_class }}">
+
+                            {{ item.expected_action }}
+
+                        </span>
+
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+
+    <!-- ACTION DISTRIBUTION -->
+
+    <div class="panel">
+
+        <h2>
+            Action Distribution
+        </h2>
+
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th>Action</th>
+                    <th>Count</th>
+                    <th>Percentage</th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+                <tr>
+
+                    <td class="allow">
+                        Allow
+                    </td>
+
+                    <td>
+                        {{ action_distribution.allow }}
+                    </td>
+
+                    <td>
+                        {{ action_distribution.allow_percent }}%
+                    </td>
+
+                </tr>
+
+
+                <tr>
+
+                    <td class="monitor">
+                        Monitor
+                    </td>
+
+                    <td>
+                        {{ action_distribution.monitor }}
+                    </td>
+
+                    <td>
+                        {{ action_distribution.monitor_percent }}%
+                    </td>
+
+                </tr>
+
+
+                <tr>
+
+                    <td class="block">
+                        Block
+                    </td>
+
+                    <td>
+                        {{ action_distribution.block }}
+                    </td>
+
+                    <td>
+                        {{ action_distribution.block_percent }}%
+                    </td>
+
+                </tr>
+
+
+                <tr>
+
+                    <td class="quarantine">
+                        Quarantine
+                    </td>
+
+                    <td>
+                        {{ action_distribution.quarantine }}
+                    </td>
+
+                    <td>
+                        {{ action_distribution.quarantine_percent }}%
+                    </td>
+
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+
+    <!-- LIVE RUNTIME MONITORING -->
+
+    <div class="panel">
+
+        <div class="live-header">
+
+            <h2>
+                Live Security Incidents
+            </h2>
+
+            <button
+                id="generateIncidentButton"
+                class="live-button"
+                onclick="generateLiveIncident()">
+
+                ⚡ Generate Live Incident
+
+            </button>
+
+        </div>
+
+
+        <div
+            id="liveStatus"
+            class="live-status">
+
+            Runtime monitoring connected.
+
+        </div>
+
+
+        <div class="live-table">
 
             <table>
 
@@ -428,164 +707,35 @@
 
                     <tr>
 
+                        <th>Incident ID</th>
                         <th>Category</th>
-                        <th>Total</th>
-                        <th>Correct</th>
-                        <th>Accuracy</th>
-                        <th>Expected Action</th>
-
-                    </tr>
-
-                </thead>
-
-
-                <tbody>
-
-                    {% for item in category_results %}
-
-                    <tr>
-
-                        <td>
-
-                            <span class="badge {{ item.category }}">
-
-                                {{ item.category.upper() }}
-
-                            </span>
-
-                        </td>
-
-
-                        <td>
-                            {{ item.total }}
-                        </td>
-
-
-                        <td>
-                            {{ item.correct }}
-                        </td>
-
-
-                        <td>
-                            <strong>{{ item.accuracy }}%</strong>
-                        </td>
-
-
-                        <td>
-
-                            <span class="{{ item.action_class }}">
-
-                                {{ item.expected_action }}
-
-                            </span>
-
-                        </td>
-
-                    </tr>
-
-                    {% endfor %}
-
-                </tbody>
-
-            </table>
-
-        </div>
-
-
-        <!-- ACTION DISTRIBUTION -->
-
-        <div class="panel">
-
-            <h2>
-                Action Distribution
-            </h2>
-
-
-            <table>
-
-                <thead>
-
-                    <tr>
-
+                        <th>Severity</th>
+                        <th>Suggested Action</th>
+                        <th>Confidence</th>
+                        <th>Recommendation</th>
+                        <th>Explanation</th>
+                        <th>User Decision</th>
+                        <th>Action Status</th>
                         <th>Action</th>
-                        <th>Count</th>
-                        <th>Percentage</th>
 
                     </tr>
 
                 </thead>
 
 
-                <tbody>
-
-
-                    <tr>
-
-                        <td class="allow">
-                            Allow
-                        </td>
-
-                        <td>
-                            {{ action_distribution.allow }}
-                        </td>
-
-                        <td>
-                            {{ action_distribution.allow_percent }}%
-                        </td>
-
-                    </tr>
-
+                <tbody id="incidentTableBody">
 
                     <tr>
 
-                        <td class="monitor">
-                            Monitor
-                        </td>
+                        <td
+                            colspan="10"
+                            class="empty-message">
 
-                        <td>
-                            {{ action_distribution.monitor }}
-                        </td>
+                            Loading live incidents...
 
-                        <td>
-                            {{ action_distribution.monitor_percent }}%
                         </td>
 
                     </tr>
-
-
-                    <tr>
-
-                        <td class="block">
-                            Block
-                        </td>
-
-                        <td>
-                            {{ action_distribution.block }}
-                        </td>
-
-                        <td>
-                            {{ action_distribution.block_percent }}%
-                        </td>
-
-                    </tr>
-
-
-                    <tr>
-
-                        <td class="quarantine">
-                            Quarantine
-                        </td>
-
-                        <td>
-                            {{ action_distribution.quarantine }}
-                        </td>
-
-                        <td>
-                            {{ action_distribution.quarantine_percent }}%
-                        </td>
-
-                    </tr>
-
 
                 </tbody>
 
@@ -593,413 +743,1042 @@
 
         </div>
 
-
-    </div>
-            <!-- LIVE RUNTIME MONITORING -->
-
-        <div class="panel">
-
-            <div class="live-header">
-
-                <h2>
-                    Live Security Incidents
-                </h2>
-
-                <button
-                    id="generateIncidentButton"
-                    class="live-button"
-                    onclick="generateLiveIncident()">
-                    ⚡ Generate Live Incident
-                </button>
-
-            </div>
-
-            <div
-                id="liveStatus"
-                class="live-status">
-                Runtime monitoring connected.
-            </div>
-
-            <div class="live-table">
-
-                <table>
-
-                    <thead>
-
-                        <tr>
-                            <th>Incident ID</th>
-                            <th>Category</th>
-                            <th>Severity</th>
-                            <th>Suggested Action</th>
-                            <th>Confidence</th>
-                            <th>Recommendation</th>
-                            <th>User Action</th>
-                        </tr>
-
-                    </thead>
-
-                    <tbody id="incidentTableBody">
-
-                        <tr>
-                            <td
-                                colspan="6"
-                                class="empty-message">
-                                Loading live incidents...
-                            </td>
-                        </tr>
-
-                    </tbody>
-
-                </table>
-
-            </div>
-
-        </div>
-
-
-    <div class="footer">
-
-        XRL-Guard Security Dashboard
-
     </div>
 
 
-    <!--
-        JINJA DATA
-
-        Jinja is kept outside JavaScript.
-        This prevents VS Code "Property assignment expected"
-        errors.
-    -->
-
-    <div id="dashboardData"
-
-         data-attack-labels='{{ attack_labels | tojson | safe }}'
-
-         data-attack-values='{{ attack_values | tojson | safe }}'
-
-         data-action-labels='{{ action_labels | tojson | safe }}'
-
-         data-action-values='{{ action_values | tojson | safe }}'>
-
-    </div>
+</div>
 
 
-    <script>
+<div class="footer">
 
-        const dashboardData =
-            document.getElementById("dashboardData");
+    XRL-Guard Security Dashboard
 
-
-        const attackLabels =
-            JSON.parse(
-                dashboardData.dataset.attackLabels
-            );
+</div>
 
 
-        const attackValues =
-            JSON.parse(
-                dashboardData.dataset.attackValues
-            );
+<!--
+    JINJA DATA
+
+    Jinja is kept outside JavaScript.
+-->
+
+<div id="dashboardData"
+
+     data-attack-labels='{{ attack_labels | tojson | safe }}'
+
+     data-attack-values='{{ attack_values | tojson | safe }}'
+
+     data-action-labels='{{ action_labels | tojson | safe }}'
+
+     data-action-values='{{ action_values | tojson | safe }}'>
+
+</div>
 
 
-        const actionLabels =
-            JSON.parse(
-                dashboardData.dataset.actionLabels
-            );
+<script>
+
+const dashboardData =
+    document.getElementById("dashboardData");
 
 
-        const actionValues =
-            JSON.parse(
-                dashboardData.dataset.actionValues
-            );
+const attackLabels =
+    JSON.parse(
+        dashboardData.dataset.attackLabels
+    );
 
 
-        /* ATTACK CATEGORY CHART */
+const attackValues =
+    JSON.parse(
+        dashboardData.dataset.attackValues
+    );
 
-        const attackCanvas =
-            document.getElementById("attackChart");
+
+const actionLabels =
+    JSON.parse(
+        dashboardData.dataset.actionLabels
+    );
 
 
-        new Chart(
-            attackCanvas,
-            {
-                type: "doughnut",
+const actionValues =
+    JSON.parse(
+        dashboardData.dataset.actionValues
+    );
 
-                data: {
 
-                    labels: attackLabels,
+/* -------------------------------------------------------
+   ATTACK CATEGORY CHART
+------------------------------------------------------- */
 
-                    datasets: [
-                        {
-                            data: attackValues
-                        }
-                    ]
+const attackCanvas =
+    document.getElementById("attackChart");
 
-                },
 
-                options: {
+new Chart(
+    attackCanvas,
+    {
+        type: "doughnut",
 
-                    responsive: true,
+        data: {
 
-                    maintainAspectRatio: false,
+            labels: attackLabels,
 
-                    plugins: {
+            datasets: [
+                {
+                    data: attackValues
+                }
+            ]
 
-                        legend: {
+        },
 
-                            position: "bottom"
+        options: {
 
-                        }
+            responsive: true,
+
+            maintainAspectRatio: false,
+
+            plugins: {
+
+                legend: {
+
+                    position: "bottom"
+
+                }
+
+            }
+
+        }
+
+    }
+);
+
+
+/* -------------------------------------------------------
+   ACTION DISTRIBUTION CHART
+------------------------------------------------------- */
+
+const actionCanvas =
+    document.getElementById("actionChart");
+
+
+new Chart(
+    actionCanvas,
+    {
+        type: "bar",
+
+        data: {
+
+            labels: actionLabels,
+
+            datasets: [
+                {
+                    label: "Predicted Actions",
+
+                    data: actionValues
+                }
+            ]
+
+        },
+
+        options: {
+
+            responsive: true,
+
+            maintainAspectRatio: false,
+
+            scales: {
+
+                y: {
+
+                    beginAtZero: true,
+
+                    ticks: {
+
+                        precision: 0
 
                     }
 
                 }
 
+            },
+
+            plugins: {
+
+                legend: {
+
+                    display: false
+
+                }
+
             }
+
+        }
+
+    }
+);
+
+</script>
+
+
+<script>
+
+/* -------------------------------------------------------
+   RUNTIME API
+------------------------------------------------------- */
+
+const RUNTIME_API =
+    "https://127.0.0.1:5001";
+
+
+/* -------------------------------------------------------
+   LOAD LIVE INCIDENTS
+------------------------------------------------------- */
+
+async function loadLiveIncidents() {
+
+    const status =
+        document.getElementById(
+            "liveStatus"
         );
 
 
-        /* ACTION DISTRIBUTION CHART */
+    const table =
+        document.getElementById(
+            "incidentTableBody"
+        );
 
-        const actionCanvas =
-            document.getElementById("actionChart");
+
+    try {
+
+        const response =
+            await fetch(
+                RUNTIME_API +
+                "/api/incidents"
+            );
 
 
-        new Chart(
-            actionCanvas,
-            {
-                type: "bar",
+        if (!response.ok) {
 
-                data: {
+            throw new Error(
+                "Runtime API returned " +
+                response.status
+            );
 
-                    labels: actionLabels,
+        }
 
-                    datasets: [
-                        {
-                            label: "Predicted Actions",
 
-                            data: actionValues
-                        }
-                    ]
+        const data =
+            await response.json();
 
-                },
 
-                options: {
+        table.innerHTML = "";
 
-                    responsive: true,
 
-                    maintainAspectRatio: false,
+        if (
+            !data.incidents ||
+            data.incidents.length === 0
+        ) {
 
-                    scales: {
+            table.innerHTML = `
 
-                        y: {
+                <tr>
 
-                            beginAtZero: true,
+                    <td
+                        colspan="10"
+                        class="empty-message">
 
-                            ticks: {
+                        No live incidents available.
 
-                                precision: 0
+                    </td>
 
-                            }
+                </tr>
 
-                        }
+            `;
+
+
+            status.textContent =
+                "No incidents recorded.";
+
+            return;
+
+        }
+
+
+        data.incidents
+            .slice()
+            .reverse()
+            .forEach(function(incident) {
+
+
+            const row =
+                document.createElement("tr");
+
+
+            /* ------------------------------------------------
+               CONFIDENCE
+            ------------------------------------------------ */
+
+            const confidence =
+                (
+                    Number(
+                        incident.confidence
+                    ) * 100
+                ).toFixed(2);
+
+
+            /* ------------------------------------------------
+               ACTION
+            ------------------------------------------------ */
+
+            const action =
+                incident.suggested_action ||
+                "Unknown";
+
+
+            const actionClass =
+                action.toLowerCase();
+
+
+            /* ------------------------------------------------
+               USER DECISION
+            ------------------------------------------------ */
+
+            const userDecision =
+                incident.user_decision ||
+                "PENDING";
+
+
+            /* ------------------------------------------------
+               ACTION STATUS
+            ------------------------------------------------ */
+
+            const actionStatus =
+                incident.action_status ||
+                "PENDING";
+
+
+            let userDecisionCell;
+
+            let actionStatusCell;
+
+            let actionCell;
+
+
+            /* ------------------------------------------------
+               PENDING
+            ------------------------------------------------ */
+
+            if (
+                userDecision === "PENDING"
+            ) {
+
+                userDecisionCell = `
+
+                    <span
+                        class="action-status status-pending">
+
+                        PENDING
+
+                    </span>
+
+                `;
+
+
+                actionStatusCell = `
+
+                    <span
+                        class="action-status status-pending">
+
+                        PENDING
+
+                    </span>
+
+                `;
+
+
+                actionCell = `
+
+                    <div class="action-buttons">
+
+                        <button
+                            class="accept-button"
+                            onclick="acceptIncident('${incident.incident_id}')">
+
+                            ✓ Accept
+
+                        </button>
+
+
+                        <button
+                            class="deny-button"
+                            onclick="showDenyReason('${incident.incident_id}')">
+
+                            ✕ Deny
+
+                        </button>
+
+
+                        <div
+                            id="denyBox-${incident.incident_id}"
+                            style="display:none;">
+
+                            <select
+                                id="denyReason-${incident.incident_id}"
+                                class="deny-reason">
+
+                                <option value="">
+                                    Select reason
+                                </option>
+
+                                <option value="False positive suspected">
+                                    False positive suspected
+                                </option>
+
+                                <option value="Action not appropriate">
+                                    Action not appropriate
+                                </option>
+
+                                <option value="Need further investigation">
+                                    Need further investigation
+                                </option>
+
+                                <option value="Already handled manually">
+                                    Already handled manually
+                                </option>
+
+                                <option value="Other">
+                                    Other
+                                </option>
+
+                            </select>
+
+
+                            <button
+                                class="deny-button"
+                                onclick="denyIncident('${incident.incident_id}')">
+
+                                Confirm Deny
+
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                `;
+
+            }
+
+
+            /* ------------------------------------------------
+               ACCEPTED
+            ------------------------------------------------ */
+
+            else if (
+                userDecision === "ACCEPTED"
+            ) {
+
+                userDecisionCell = `
+
+                    <span
+                        class="action-status status-completed">
+
+                        ✓ ACCEPTED
+
+                    </span>
+
+                `;
+
+
+                actionStatusCell = `
+
+                    <span
+                        class="action-status status-completed">
+
+                        ✓ COMPLETED
+
+                    </span>
+
+                `;
+
+
+                actionCell = `
+
+                    <span
+                        class="decision-info">
+
+                        User accepted the recommendation.
+
+                    </span>
+
+                `;
+
+            }
+
+
+            /* ------------------------------------------------
+               DENIED
+            ------------------------------------------------ */
+
+            else if (
+                userDecision === "DENIED"
+            ) {
+
+                userDecisionCell = `
+
+                    <span
+                        class="action-status status-denied">
+
+                        ✕ DENIED
+
+                    </span>
+
+                `;
+
+
+                actionStatusCell = `
+
+                    <span
+                        class="action-status status-not-performed">
+
+                        NOT PERFORMED
+
+                    </span>
+
+                `;
+
+
+                actionCell = `
+
+                    <div class="decision-info">
+
+                        Recommendation was not performed.
+
+                        <div class="deny-reason-text">
+
+                            Reason:
+                            ${incident.deny_reason ||
+                              "Not specified"}
+
+                        </div>
+
+                    </div>
+
+                `;
+
+            }
+
+
+            /* ------------------------------------------------
+               ROW
+            ------------------------------------------------ */
+
+            row.innerHTML = `
+
+                <td>
+
+                    <span class="incident-id">
+
+                        ${incident.incident_id}
+
+                    </span>
+
+                </td>
+
+
+                <td>
+
+                    <span
+                        class="badge ${incident.category}">
+
+                        ${String(
+                            incident.category ||
+                            "unknown"
+                        ).toUpperCase()}
+
+                    </span>
+
+                </td>
+
+
+                <td>
+
+                    <strong>
+
+                        ${incident.severity || "UNKNOWN"}
+
+                    </strong>
+
+                </td>
+
+
+                <td class="${actionClass}">
+
+                    ${action}
+
+                </td>
+
+
+                <td>
+
+                    <span class="confidence">
+
+                        ${confidence}%
+
+                    </span>
+
+                </td>
+
+
+                <td>
+
+                    ${incident.recommendation ||
+                      "No recommendation available."}
+
+                </td>
+
+
+                <td class="explanation">
+
+                    ${incident.reason ||
+                      "No explanation available."}
+
+                </td>
+
+
+                <td>
+
+                    ${userDecisionCell}
+
+                </td>
+
+
+                <td>
+
+                    ${actionStatusCell}
+
+                </td>
+
+
+                <td>
+
+                    ${actionCell}
+
+                </td>
+
+            `;
+
+
+            table.appendChild(row);
+
+        });
+
+
+        status.textContent =
+            "Showing " +
+            data.count +
+            " recent live incidents. Review the recommendation, perform the action if appropriate, then confirm or deny it.";
+
+
+    }
+
+
+    catch (error) {
+
+        console.error(
+            "Runtime API error:",
+            error
+        );
+
+
+        status.textContent =
+            "Runtime API connection failed.";
+
+
+        table.innerHTML = `
+
+            <tr>
+
+                <td
+                    colspan="10"
+                    class="empty-message">
+
+                    Unable to connect to runtime API.
+
+                </td>
+
+            </tr>
+
+        `;
+
+    }
+
+}
+
+
+/* -------------------------------------------------------
+   GENERATE LIVE INCIDENT
+------------------------------------------------------- */
+
+async function generateLiveIncident() {
+
+    const button =
+        document.getElementById(
+            "generateIncidentButton"
+        );
+
+
+    const status =
+        document.getElementById(
+            "liveStatus"
+        );
+
+
+    button.disabled = true;
+
+    button.textContent =
+        "Generating...";
+
+
+    status.textContent =
+        "Analyzing network event using PPO + XAI...";
+
+
+    try {
+
+        const response =
+            await fetch(
+
+                RUNTIME_API +
+                "/api/generate",
+
+                {
+                    method: "POST"
+                }
+
+            );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                "Generation failed: " +
+                response.status
+            );
+
+        }
+
+
+        const data =
+            await response.json();
+
+
+        if (data.success) {
+
+            status.textContent =
+                "New incident generated: " +
+                data.incident.incident_id +
+                ". Review the recommendation and choose Accept or Deny.";
+
+
+            await loadLiveIncidents();
+
+        }
+
+        else {
+
+            status.textContent =
+                data.message ||
+                "Unable to generate incident.";
+
+        }
+
+    }
+
+
+    catch (error) {
+
+        console.error(
+            "Incident generation error:",
+            error
+        );
+
+
+        status.textContent =
+            "Unable to generate live incident.";
+
+    }
+
+
+    finally {
+
+        button.disabled = false;
+
+        button.textContent =
+            "⚡ Generate Live Incident";
+
+    }
+
+}
+
+
+/* -------------------------------------------------------
+   ACCEPT INCIDENT
+------------------------------------------------------- */
+
+async function acceptIncident(
+    incidentId
+) {
+
+    const status =
+        document.getElementById(
+            "liveStatus"
+        );
+
+
+    status.textContent =
+        "Recording accepted recommendation...";
+
+
+    try {
+
+        const response =
+            await fetch(
+
+                RUNTIME_API +
+                "/api/incidents/" +
+                encodeURIComponent(
+                    incidentId
+                ) +
+                "/accept",
+
+                {
+                    method: "POST"
+                }
+
+            );
+
+
+        const data =
+            await response.json();
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.message ||
+                "Accept operation failed."
+            );
+
+        }
+
+
+        if (data.success) {
+
+            status.textContent =
+                "Recommendation accepted for " +
+                incidentId +
+                ". User action marked as COMPLETED.";
+
+
+            await loadLiveIncidents();
+
+        }
+
+    }
+
+
+    catch (error) {
+
+        console.error(
+            "Accept error:",
+            error
+        );
+
+
+        status.textContent =
+            "Unable to record accepted action.";
+
+    }
+
+}
+
+
+/* -------------------------------------------------------
+   SHOW DENY REASON
+------------------------------------------------------- */
+
+function showDenyReason(
+    incidentId
+) {
+
+    const box =
+        document.getElementById(
+            "denyBox-" +
+            incidentId
+        );
+
+
+    if (!box) {
+
+        return;
+
+    }
+
+
+    if (
+        box.style.display === "none"
+        ||
+        box.style.display === ""
+    ) {
+
+        box.style.display =
+            "block";
+
+    }
+
+    else {
+
+        box.style.display =
+            "none";
+
+    }
+
+}
+
+
+/* -------------------------------------------------------
+   DENY INCIDENT
+------------------------------------------------------- */
+
+async function denyIncident(
+    incidentId
+) {
+
+    const status =
+        document.getElementById(
+            "liveStatus"
+        );
+
+
+    const reasonElement =
+        document.getElementById(
+            "denyReason-" +
+            incidentId
+        );
+
+
+    if (!reasonElement) {
+
+        return;
+
+    }
+
+
+    const reason =
+        reasonElement.value.trim();
+
+
+    if (!reason) {
+
+        alert(
+            "Please select a reason before denying the recommendation."
+        );
+
+        return;
+
+    }
+
+
+    status.textContent =
+        "Recording denied recommendation...";
+
+
+    try {
+
+        const response =
+            await fetch(
+
+                RUNTIME_API +
+                "/api/incidents/" +
+                encodeURIComponent(
+                    incidentId
+                ) +
+                "/deny",
+
+                {
+
+                    method: "POST",
+
+                    headers: {
+
+                        "Content-Type":
+                            "application/json"
 
                     },
 
-                    plugins: {
+                    body: JSON.stringify({
 
-                        legend: {
+                        reason: reason
 
-                            display: false
-
-                        }
-
-                    }
+                    })
 
                 }
 
-            }
+            );
+
+
+        const data =
+            await response.json();
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.message ||
+                "Deny operation failed."
+            );
+
+        }
+
+
+        if (data.success) {
+
+            status.textContent =
+                "Recommendation denied for " +
+                incidentId +
+                ". Action was not performed.";
+
+
+            await loadLiveIncidents();
+
+        }
+
+    }
+
+
+    catch (error) {
+
+        console.error(
+            "Deny error:",
+            error
         );
 
-    </script>
-        <script>
 
-        const RUNTIME_API =
-            "https://127.0.0.1:5001";
+        status.textContent =
+            "Unable to record denied recommendation.";
 
+    }
 
-        async function loadLiveIncidents() {
-
-            const status = document.getElementById("liveStatus");
-            const table = document.getElementById("incidentTableBody");
-
-            try {
-                const response = await fetch(RUNTIME_API + "/api/incidents");
-
-                if (!response.ok) {
-                    throw new Error("Runtime API returned " + response.status);
-                }
-
-                const data = await response.json();
-                table.innerHTML = "";
-
-                if (!data.incidents || data.incidents.length === 0) {
-                    table.innerHTML = `
-                        <tr>
-                            <td colspan="7" class="empty-message">
-                                No live incidents available.
-                            </td>
-                        </tr>`;
-                    status.textContent = "No incidents recorded.";
-                    return;
-                }
-
-                data.incidents.slice().reverse().forEach(function(incident) {
-
-                    const row = document.createElement("tr");
-                    const confidence = (Number(incident.confidence) * 100).toFixed(2);
-                    const action = incident.suggested_action || "Unknown";
-                    const actionClass = action.toLowerCase();
-                    const actionStatus = incident.user_action_status || "PENDING";
-
-                    let userActionCell;
-
-                    if (actionStatus === "COMPLETED") {
-                        userActionCell = `
-                            <span class="action-status status-completed">
-                                ✓ COMPLETED
-                            </span>`;
-                    } else {
-                        userActionCell = `
-                            <div>
-                                <span class="action-status status-pending">
-                                    PENDING
-                                </span>
-                                <br><br>
-                                <button
-                                    class="complete-button"
-                                    onclick="completeIncident('${incident.incident_id}')">
-                                    ✓ Action Completed
-                                </button>
-                            </div>`;
-                    }
-
-                    row.innerHTML = `
-                        <td>
-                            <span class="incident-id">
-                                ${incident.incident_id}
-                            </span>
-                        </td>
-                        <td>
-                            <span class="badge ${incident.category}">
-                                ${incident.category.toUpperCase()}
-                            </span>
-                        </td>
-                        <td><strong>${incident.severity}</strong></td>
-                        <td class="${actionClass}">${action}</td>
-                        <td>
-                            <span class="confidence">${confidence}%</span>
-                        </td>
-                        <td>${incident.recommendation}</td>
-                        <td>${userActionCell}</td>
-                    `;
-
-                    table.appendChild(row);
-                });
-
-                status.textContent =
-                    "Showing " + data.count +
-                    " recent live incidents. User confirmation is required after performing the suggested action.";
-
-            } catch (error) {
-                console.error("Runtime API error:", error);
-                status.textContent = "Runtime API connection failed.";
-                table.innerHTML = `
-                    <tr>
-                        <td colspan="7" class="empty-message">
-                            Unable to connect to runtime API.
-                        </td>
-                    </tr>`;
-            }
-        }
+}
 
 
-        async function generateLiveIncident() {
+/* -------------------------------------------------------
+   INITIAL LOAD
+------------------------------------------------------- */
 
-            const button = document.getElementById("generateIncidentButton");
-            const status = document.getElementById("liveStatus");
+loadLiveIncidents();
 
-            button.disabled = true;
-            button.textContent = "Generating...";
-            status.textContent = "Analyzing network event using PPO + XAI...";
-
-            try {
-                const response = await fetch(
-                    RUNTIME_API + "/api/generate",
-                    { method: "POST" }
-                );
-
-                if (!response.ok) {
-                    throw new Error("Generation failed: " + response.status);
-                }
-
-                const data = await response.json();
-
-                if (data.success) {
-                    status.textContent =
-                        "New incident generated: " +
-                        data.incident.incident_id +
-                        ". Review the suggested action and perform it if appropriate.";
-                    await loadLiveIncidents();
-                }
-
-            } catch (error) {
-                console.error("Incident generation error:", error);
-                status.textContent = "Unable to generate live incident.";
-            } finally {
-                button.disabled = false;
-                button.textContent = "⚡ Generate Live Incident";
-            }
-        }
-
-
-        async function completeIncident(incidentId) {
-
-            const status = document.getElementById("liveStatus");
-            status.textContent = "Recording user action...";
-
-            try {
-                const response = await fetch(
-                    RUNTIME_API +
-                    "/api/incidents/" +
-                    encodeURIComponent(incidentId) +
-                    "/complete",
-                    { method: "POST" }
-                );
-
-                if (!response.ok) {
-                    throw new Error("Completion failed: " + response.status);
-                }
-
-                const data = await response.json();
-
-                if (data.success) {
-                    status.textContent =
-                        "User action recorded as COMPLETED for " + incidentId + ".";
-                    await loadLiveIncidents();
-                }
-
-            } catch (error) {
-                console.error("Completion error:", error);
-                status.textContent = "Unable to record user action.";
-            }
-        }
-
-
-        loadLiveIncidents();
-
-    </script>
+</script>
 
 
 </body>
